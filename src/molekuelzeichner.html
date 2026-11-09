@@ -913,7 +913,9 @@ function isolatedH(k, left) {
 function atomInfo(a, deg) {
   const struct = display.mode === 'struct';
   const h = implicitH(a);
-  const show = struct || display.mode === 'cond' || unitShown(a) || a.el !== 'C' || a.charge !== 0 || deg === 0 || !!a.showLabel;
+  // kumuliertes C (=C=, z. B. N=C=O, O=C=O, C=C=C) liegt auf einer Geraden – ohne Symbol wäre es unsichtbar
+  const cum = a.el === 'C' && deg === 2 && bondsOf(a.id).filter(b => b.order === 2).length === 2;
+  const show = struct || display.mode === 'cond' || unitShown(a) || a.el !== 'C' || a.charge !== 0 || deg === 0 || !!a.showLabel || cum;
   let left;
   if (deg === 0) left = ['O', 'S', 'F', 'Cl', 'Br', 'I'].includes(a.el);
   else left = neighbors(a.id).reduce((s, o) => s + (o.x - a.x), 0) > 0.5;
