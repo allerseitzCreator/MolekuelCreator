@@ -857,7 +857,10 @@ const TAU = 2 * Math.PI;
 const normA = x => ((x % TAU) + TAU) % TAU;
 
 // freie Elektronenpaare sichtbar? Fischer-Projektion: standardmäßig ohne, einzeln einblendbar (a.lpF)
-function lpOn(a) { return display.mode === 'fischer' ? !!a.lpF : (a.lp ?? display.lp); }
+// Skelett- und Halbstrukturformel: freie Elektronenpaare eigens einstellbar (beim Wählen der Darstellung zunächst aus)
+const LP_OWN = ['skeletal', 'cond'];
+function lpAll() { return LP_OWN.includes(display.mode) ? !!(display.lpBy && display.lpBy[display.mode]) : display.lp; }
+function lpOn(a) { return display.mode === 'fischer' ? !!a.lpF : (a.lp ?? lpAll()); }
 function lonePairCount(a, h) {
   const ve = VE[a.el]; if (ve === undefined) return 0;
   return Math.max(0, Math.floor((ve - a.charge - bondSum(a.id) - h - (a.rad || 0)) / 2));
@@ -3396,7 +3399,7 @@ function bboxMol(pad) {
 function bboxOwn(pad) {
   if (!atoms.length) return null;
   if (isProj(display.mode) && projBox) return {...projBox};
-  pad += (display.mode === 'struct' ? HLS : 0) + (display.lp || atoms.some(a => a.lp) ? 8 : 0);
+  pad += (display.mode === 'struct' ? HLS : 0) + (lpAll() || atoms.some(a => a.lp) ? 8 : 0);
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const a of atoms) { x0 = Math.min(x0, a.x); y0 = Math.min(y0, a.y); x1 = Math.max(x1, a.x); y1 = Math.max(y1, a.y); }
   return {x: x0 - pad, y: y0 - pad, w: x1 - x0 + 2 * pad, h: y1 - y0 + 2 * pad};
@@ -5356,7 +5359,7 @@ selLp.onclick = () => {
   if (turnOn) list.forEach(a => delete a.lpHidden);
   if (display.mode === 'fischer') { list.forEach(a => { if (turnOn) a.lpF = true; else delete a.lpF; }); changed(); return; }
   // Entspricht der neue Zustand der globalen Einstellung, wird die Einzeleinstellung entfernt
-  for (const a of list) { if (turnOn === display.lp) delete a.lp; else a.lp = turnOn; }
+  for (const a of list) { if (turnOn === lpAll()) delete a.lp; else a.lp = turnOn; }
   changed();
 };
 function selHasAtoms() { return [...sel].some(k => k.startsWith('a:') || k.startsWith('h:')); }
@@ -5410,14 +5413,14 @@ document.getElementById('selClose').onclick = () => { sel.clear(); renderOverlay
 function syncDisplayUI() {
   document.querySelectorAll('#modeBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.mode === display.mode));
   document.querySelectorAll('#lpStyleBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.lp === display.lpStyle));
-  document.getElementById('lpCheck').checked = display.lp;
+  document.getElementById('lpCheck').checked = lpAll();
   document.querySelectorAll('#rsSeg button').forEach(b => b.classList.toggle('on', b.dataset.rs === (!display.rs ? 'off' : display.star ? 'star' : 'rs')));
   document.getElementById('aromCheck').checked = !!display.arom;
   document.getElementById('cnumCheck').checked = !!display.cnum;
   document.querySelectorAll('#gridBtns button').forEach(b => b.classList.toggle('on', b.dataset.grid === (display.grid || 'off')));
   document.getElementById('fRS').textContent = (display.star ? '✱ ' : 'R/S ') + (display.rs ? 'ausblenden' : 'einblenden');
   document.getElementById('fC').textContent = display.showC ? 'C-Atome ausblenden' : 'C-Atome zeigen';
-  document.getElementById('lpStyleBtns').classList.toggle('off', !display.lp);
+  document.getElementById('lpStyleBtns').classList.toggle('off', !lpAll());
 }
 function setDisplay(patch) {
   if (patch.mode !== undefined && !scopeDepth) {
@@ -5558,14 +5561,19 @@ document.getElementById('fEnant').onclick = () => {
   if (!ids.length) return;
   pushUndo(); ids.forEach(id => { const a = atomById(id); a.cip = a.cip === 'R' ? 'S' : 'R'; }); changed();
 };
-document.querySelectorAll('#modeBtns .tbtn').forEach(b => b.onclick = () => setDisplay({mode: b.dataset.mode}));
+document.querySelectorAll('#modeBtns .tbtn').forEach(b => b.onclick = () => {
+  const m = b.dataset.mode;
+  // Skelett-/Halbstrukturformel: beim Auswählen zunächst ohne freie Elektronenpaare (danach per Häkchen zuschaltbar)
+  if (LP_OWN.includes(m) && m !== display.mode) display.lpBy = {...(display.lpBy || {}), [m]: false};
+  setDisplay({mode: m});
+});
 document.querySelectorAll('#lpStyleBtns .tbtn').forEach(b => b.onclick = () => setDisplay({lpStyle: b.dataset.lp}));
 document.getElementById('lpCheck').onchange = e => {
   // gilt immer für alle Atome: auch einzeln aus- oder weggeblendete Elektronenpaare wieder einheitlich zeigen bzw. ausblenden
   const on = e.target.checked;
   if (atoms.some(a => a.lp !== undefined || hasHidden(a))) pushUndo();
   atoms.forEach(a => { delete a.lp; delete a.lpHidden; });
-  setDisplay({lp: on});
+  if (LP_OWN.includes(display.mode)) setDisplay({lpBy: {...(display.lpBy || {}), [display.mode]: on}}); else setDisplay({lp: on});
   toast(on ? 'Freie Elektronenpaare an allen Atomen eingeblendet' : 'Freie Elektronenpaare an allen Atomen ausgeblendet');
 };
 syncDisplayUI();
