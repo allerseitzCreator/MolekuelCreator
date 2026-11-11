@@ -17,9 +17,9 @@ Ein Molekül-Zeichenprogramm für den Chemieunterricht, das komplett im Browser 
 - Gruppieren sowie Rückgängig und Wiederholen
 
 **Darstellungen**
-- Skelettformel, Halbstrukturformel und Strukturformel mit allen H-Atomen
+- Skelettformel, Halbstrukturformel und Valenzstrichformel mit allen H-Atomen
 - Fischer- und Haworth-Projektion für Zucker
-- Keil-Strich-Schreibweise in der Skelettformel, in der Strukturformel von Hand setzbar
+- Keil-Strich-Schreibweise in der Skelettformel, in der Valenzstrichformel von Hand setzbar
 - R/S-Kennzeichnung, Hybridisierung und Aromatizität
 
 **Namen und Formeln**

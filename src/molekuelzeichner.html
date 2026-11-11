@@ -274,7 +274,7 @@
       <div class="grid g2" id="modeBtns">
         <button class="tbtn" data-mode="skeletal" title="Skelettformel: C- und H-Atome am Kohlenstoff werden nicht ausgeschrieben">Skelett</button>
         <button class="tbtn" data-mode="cond" title="Halbstrukturformel: jedes Atom mit seinen H-Atomen als Gruppe (CH₃–CH₂–OH), Bindungsstriche zwischen den Gruppen">Halbstruktur</button>
-        <button class="tbtn" data-mode="struct" title="Strukturformel: alle Elementsymbole, alle H-Atome einzeln mit Bindungsstrich">Struktur</button>
+        <button class="tbtn" data-mode="struct" title="Valenzstrichformel: alle Elementsymbole, alle H-Atome einzeln mit Bindungsstrich">Valenzstrichformel</button>
         <button class="tbtn" data-mode="fischer" title="Fischer-Projektion (für Moleküle mit asymmetrischem C-Atom)">Fischer</button>
         <button class="tbtn" data-mode="haworth" title="Haworth-Projektion (für Ringzucker: Pyranosen, Furanosen)">Haworth</button>
       </div>
@@ -312,8 +312,8 @@
         <button class="tbtn on" data-order="1" title="Einfachbindung"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/></svg></button>
         <button class="tbtn" data-order="2" title="Doppelbindung"><svg viewBox="0 0 24 24"><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="3" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="2"/></svg></button>
         <button class="tbtn" data-order="3" title="Dreifachbindung"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/><line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2"/></svg></button>
-        <button class="tbtn" data-stereo="wedge" title="Keilbindung (zum Betrachter) – schmales Ende am Startatom; Klick auf Bindung: setzen bzw. Richtung umdrehen. Strukturformel: Klick auf Bindung (auch zu einem H) setzt den Keil, nochmal = normaler Strich"><svg viewBox="0 0 24 24"><polygon points="3,12 21,8 21,16" fill="currentColor"/></svg></button>
-        <button class="tbtn" data-stereo="hash" title="Strichbindung (vom Betrachter weg) – schmales Ende am Startatom. Strukturformel: Klick auf Bindung (auch zu einem H) setzt den Strichkeil, nochmal = normaler Strich"><svg viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6"><line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="10.2" x2="10" y2="13.8"/><line x1="14" y1="9.4" x2="14" y2="14.6"/><line x1="18" y1="8.6" x2="18" y2="15.4"/><line x1="21.5" y1="8" x2="21.5" y2="16"/></g></svg></button>
+        <button class="tbtn" data-stereo="wedge" title="Keilbindung (zum Betrachter) – schmales Ende am Startatom; Klick auf Bindung: setzen bzw. Richtung umdrehen. Valenzstrichformel: Klick auf Bindung (auch zu einem H) setzt den Keil, nochmal = normaler Strich"><svg viewBox="0 0 24 24"><polygon points="3,12 21,8 21,16" fill="currentColor"/></svg></button>
+        <button class="tbtn" data-stereo="hash" title="Strichbindung (vom Betrachter weg) – schmales Ende am Startatom. Valenzstrichformel: Klick auf Bindung (auch zu einem H) setzt den Strichkeil, nochmal = normaler Strich"><svg viewBox="0 0 24 24"><g stroke="currentColor" stroke-width="1.6"><line x1="6" y1="11" x2="6" y2="13"/><line x1="10" y1="10.2" x2="10" y2="13.8"/><line x1="14" y1="9.4" x2="14" y2="14.6"/><line x1="18" y1="8.6" x2="18" y2="15.4"/><line x1="21.5" y1="8" x2="21.5" y2="16"/></g></svg></button>
       </div>
     </div>
     <div class="sect">
@@ -443,7 +443,7 @@
     <div class="sect">
       <h2>Bedienung</h2>
       <div class="keys">
-        <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Strukturformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
+        <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
         <b style="color:var(--ink);font-weight:500">Stereozentren:</b> asymmetrische C-Atome tragen R/S bzw. * (noch nicht festgelegt). Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
         <b style="color:var(--ink);font-weight:500">Mesomere Grenzformeln:</b> Hat das Molekül mehrere Grenzformeln (z. B. Benzol, Carboxylat, Nitrogruppe, Allylkation, Amid), erscheint rechts ein Auswahlmenü. Am Aromaten wird der mesomere Effekt berücksichtigt: +M-Substituenten (–OH, –NH₂, –O⁻, Halogene) erzeugen negative Ladungen in ortho/para-Stellung, −M-Substituenten (–NO₂, –CHO, –COOH, –COR, –CN) positive Ladungen in ortho/para-Stellung. Unrealistische Formeln werden weggelassen: keine positive Ladung am C der C=O-/C≡N-Gruppe und kein O⁺ an –OH/–OR von Säuren und Estern; positive Ladungen an O, S oder Halogen nur, wenn das Atom sein Elektronenpaar in einen Ring oder eine C=C-Doppelbindung abgibt. Im Menü: dort eine Grenzformel wählen (das Molekül wird umgezeichnet) oder „Alle nebeneinander zeichnen“ – mit Mesomeriepfeilen, jeder Schritt eine Elektronenverschiebung. Bei mehreren Molekülen gilt es für das ausgewählte, sonst für das größte.<br>
@@ -464,14 +464,14 @@
         <b style="color:var(--ink);font-weight:500">Plausibilität:</b> Neue Bindungen werden geprüft. Kann das Atom mit Ladung mehr Bindungen eingehen, wird sie ergänzt (N mit 4 Bindungen → N⁺, O mit 3 → O⁺, S mit 3 → S⁺, P mit 4 → P⁺, B mit 4 → B⁻) und beim Entfernen der Bindung wieder zurückgenommen. Unmögliche Bindungen (z. B. zwei an einem H, fünf an einem C) lösen eine Warnung aus und werden rot gestrichelt markiert.<br>
         <b style="color:var(--ink);font-weight:500">Ladung &amp; Radikale:</b> Ladungszeichen lassen sich mit „Auswählen“ anklicken und einfärben (Löschen entfernt die Ladung) und mit „Auswählen“ oder „Verschieben“ um das Atom ziehen – sie rasten in 45°-Schritten ein (<kbd>Umschalt</kbd> = frei). „• Radikal“ (Werkzeug oder Auswahlleiste) setzt je Klick ein ungepaartes Elektron als Punkt ans Atom – die H-Zahl passt sich an (CH₄ → CH₃•). Einzelne Punkte sind anklickbar zum Färben oder Löschen. Rückgängig machen: mit dem Radikal-Werkzeug den Punkt anklicken (oder <kbd>Umschalt</kbd>-Klick aufs Atom), in der Auswahlleiste „– Radikal“, mit dem Radierer oder „Rückgängig“ – die H-Atome kehren zurück (CH₃• → CH₄).<br>
         <b style="color:var(--ink);font-weight:500">Pfeile:</b> Pfeiltyp wählen und auf der Fläche ziehen. Ausgewählte Pfeile zeigen Griffe (Elektronenverschiebepfeil: 2 Enden + 2 Biegepunkte). „gestrichelt“ und die Spitze (1 oder 2 Striche) gelten für neue bzw. ausgewählte Pfeile.<br>
-        <b style="color:var(--ink);font-weight:500">Keil-Strich:</b> unter „Bindung“ Keil ▲ oder Strich ┅ wählen und vom Stereozentrum aus zeichnen bzw. eine Bindung anklicken (erneut klicken kehrt sie um); R/S folgt der Zeichnung. In der Strukturformel liegen die beiden Kettenbindungen in der Ebene, die beiden anderen Bindungen zeigen gemeinsam nach vorn (Keile) oder gemeinsam nach hinten (Striche) – wie eine um 90° gedrehte Fischer-Projektion (dort: senkrecht nach hinten, waagrecht nach vorn). Fischer, Struktur- und Skelettformel zeigen immer dieselbe räumliche Anordnung.<br>
-        <b style="color:var(--ink);font-weight:500">Strukturformel:</b> eigene, rechtwinklige Anordnung (sp³-C im Kreuz); Skelett- und Strukturformel merken sich ihre Atompositionen getrennt.<br>
+        <b style="color:var(--ink);font-weight:500">Keil-Strich:</b> unter „Bindung“ Keil ▲ oder Strich ┅ wählen und vom Stereozentrum aus zeichnen bzw. eine Bindung anklicken (erneut klicken kehrt sie um); R/S folgt der Zeichnung. In der Valenzstrichformel liegen die beiden Kettenbindungen in der Ebene, die beiden anderen Bindungen zeigen gemeinsam nach vorn (Keile) oder gemeinsam nach hinten (Striche) – wie eine um 90° gedrehte Fischer-Projektion (dort: senkrecht nach hinten, waagrecht nach vorn). Fischer, Struktur- und Skelettformel zeigen immer dieselbe räumliche Anordnung.<br>
+        <b style="color:var(--ink);font-weight:500">Valenzstrichformel:</b> eigene, rechtwinklige Anordnung (sp³-C im Kreuz); Skelett- und Valenzstrichformel merken sich ihre Atompositionen getrennt.<br>
         <b style="color:var(--ink);font-weight:500">Raster:</b> □ quadratisch oder ⬡ Chemie-Raster (30°/60°/120°). Atome und Pfeile rasten beim Zeichnen und Verschieben ein; „Ausrichten“ setzt ausgewählte (sonst alle) Atome aufs Raster. Waagrechte und senkrechte Bindungen bzw. Pfeile rasten immer exakt ein (Arretierung, ±12°).<br>
         <b style="color:var(--ink);font-weight:500">Reste:</b> Atom eines Rests oder den ganzen Rest (z. B. Ethyl, Propyl per Rahmen/Umschalt-Klick) auswählen → in der Leiste Halbstrukturformel, Summenformel (C₂H₅) oder „Als Strukturformel“. Bei Resten mit mehreren C-Atomen zeigt die Halbstrukturformel jede Gruppe einzeln mit Bindungsstrichen dazwischen (CH₂–CH₂–CH₃); die Striche sind echte Bindungen und lassen sich anklicken und bearbeiten. Ein Klick auf eine dieser Gruppen bietet wieder „Als Strukturformel“ bzw. die Summenformel an. Ein Klick auf irgendein C-Atom einer Alkylgruppe (z. B. Propyl) bietet die ganze Gruppe an – „CH₂–CH₂–CH₃“ oder „C₃H₇“ – und zusätzlich „nur CH₃“ für die kleinste Gruppe am angeklickten Atom.<br>
-        <b style="color:var(--ink);font-weight:500">Halbstruktur:</b> eigene Darstellung neben Skelett und Struktur – jedes Atom mit seinen H-Atomen als Gruppe (H₃C–CH₂–OH), Bindungsstriche dazwischen, rechtwinklig angeordnet. Gilt wie die anderen Darstellungen für die ausgewählten bzw. gerade bearbeiteten Moleküle. Jedes Atom (auch H in der Strukturformel) lässt sich mit „Verschieben“/„Auswählen“ ziehen.<br>
+        <b style="color:var(--ink);font-weight:500">Halbstruktur:</b> eigene Darstellung neben Skelett- und Valenzstrichformel – jedes Atom mit seinen H-Atomen als Gruppe (H₃C–CH₂–OH), Bindungsstriche dazwischen, rechtwinklig angeordnet. Gilt wie die anderen Darstellungen für die ausgewählten bzw. gerade bearbeiteten Moleküle. Jedes Atom (auch H in der Strukturformel) lässt sich mit „Verschieben“/„Auswählen“ ziehen.<br>
         <b style="color:var(--ink);font-weight:500">C-Symbol in der Skelettformel:</b> Ecke(n) mit „Auswählen“ markieren und auf „C“ klicken (oder Taste <kbd>C</kbd>) – das Elementsymbol mit seinen H-Atomen erscheint (z. B. CH₃); nochmal „C“ blendet es wieder aus. Genauso in der Fischer-Projektion (Kreuzungspunkt anklicken → „C“) und in Ringen der Fischer-/Haworth-Projektion.<br>
         <b style="color:var(--ink);font-weight:500">Hybridisierung:</b> Atom(e) auswählen → „Hybridisierung“ in der Leiste zeigt sp, sp² oder sp³ am Atom („Hybridisierung aus“ blendet sie wieder aus). Regeln: C nach π-Bindungen (keine → sp³, eine → sp², zwei/Dreifach → sp; C⁺ → sp²), N/O/S nach σ-Bindungen + freien Elektronenpaaren; konjugiertes N (Amid, Anilin, Pyrrol) und Atome in aromatischen Ringen → sp².<br>
-        <b style="color:var(--ink);font-weight:500">Atom ersetzen:</b> Element wählen, dann Ecke (Skelett), H-Atom (Struktur) oder Gruppe (Fischer/Haworth) anklicken – die räumliche Anordnung bleibt erhalten.<br>
+        <b style="color:var(--ink);font-weight:500">Atom ersetzen:</b> Element wählen, dann Ecke (Skelett), H-Atom (Valenzstrichformel) oder Gruppe (Fischer/Haworth) anklicken – die räumliche Anordnung bleibt erhalten.<br>
         <kbd>C</kbd> <kbd>N</kbd> <kbd>O</kbd> <kbd>S</kbd> <kbd>P</kbd> <kbd>F</kbd> <kbd>H</kbd> <kbd>L</kbd>=Cl <kbd>B</kbd>=Br <kbd>I</kbd> – Element wählen bzw. Atom unter dem Mauszeiger ändern<br>
         <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> Bindungsordnung (bzw. der Bindung unter dem Zeiger)<br>
         Bindungsart gewählt + Bindung anklicken: die Bindung wird durch die gewählte ersetzt (Einfach-, Doppel-, Dreifachbindung, Keil, Strich) – in allen Darstellungen<br>
@@ -595,7 +595,7 @@ function mirror(axis) {
   const proj = isProj(display.mode);
   let ids = sel.size ? selectedAtomIds() : atoms.map(a => a.id);
   let ars = sel.size ? arrows.filter(a => sel.has('ar:' + a.id)) : arrows.slice();
-  if (proj) { if (ids.length && !ars.length) toast('Moleküle lassen sich in der Skelett- oder Strukturformel spiegeln.'); ids = []; }
+  if (proj) { if (ids.length && !ars.length) toast('Moleküle lassen sich in der Skelett- oder Valenzstrichformel spiegeln.'); ids = []; }
   ids = withHidden(ids);
   const as = ids.map(atomById).filter(Boolean);
   if (!as.length && !ars.length) return;
@@ -3112,7 +3112,7 @@ function focusParked(p) {
   sel.clear(); parkSel.clear(); hover = null;
   syncDisplayUI(); render(); updateInfo(); save();
 }
-const VIEW_DE = {skeletal: 'Skelettformel', cond: 'Halbstrukturformel', struct: 'Strukturformel', fischer: 'Fischer-Projektion', haworth: 'Haworth-Projektion'};
+const VIEW_DE = {skeletal: 'Skelettformel', cond: 'Halbstrukturformel', struct: 'Valenzstrichformel', fischer: 'Fischer-Projektion', haworth: 'Haworth-Projektion'};
 // geparkte Moleküle zeichnen (jedes in seiner Darstellung)
 function parkedMarkup() {
   parkInfo = [];
@@ -4385,7 +4385,7 @@ function projClick(h, e) {
     default: {
       if (h && h.type === 'bond') {
         const b = bondById(h.id); if (!b) return;
-        if (bondStereo) { toast('Keil/Strich gibt es nur in der Skelett- und Strukturformel.'); return; }
+        if (bondStereo) { toast('Keil/Strich gibt es nur in der Skelett- und Valenzstrichformel.'); return; }
         if (applyBondOrder(b)) changed();
         return;
       }
@@ -5525,7 +5525,7 @@ document.getElementById('aromCheck').onchange = e => { display.arom = e.target.c
 document.querySelectorAll('#gridBtns button').forEach(b => b.onclick = () => { setDisplay({grid: b.dataset.grid}); drawGrid(); });
 document.getElementById('snapAll').onclick = () => {
   if (display.grid === 'off' || !display.grid) { toast('Erst ein Raster wählen (□ oder ⬡).'); return; }
-  if (isProj(display.mode)) { toast('Ausrichten gilt für Skelett- und Strukturformel.'); return; }
+  if (isProj(display.mode)) { toast('Ausrichten gilt für Skelett- und Valenzstrichformel.'); return; }
   const ids = selectedAtomIds().length ? selectedAtomIds() : atoms.map(a => a.id);
   const arr = selArrows().length ? selArrows() : (selectedAtomIds().length ? [] : arrows);
   if (!ids.length && !arr.length) return;
