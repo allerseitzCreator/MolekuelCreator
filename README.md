@@ -20,7 +20,7 @@ Ein Molekül-Zeichenprogramm für den Chemieunterricht, das komplett im Browser 
 - Skelettformel, Halbstrukturformel und Valenzstrichformel mit allen H-Atomen
 - Fischer- und Haworth-Projektion für Zucker
 - Keil-Strich-Schreibweise in der Skelettformel, in der Valenzstrichformel von Hand setzbar
-- R/S-Kennzeichnung, Hybridisierung und Aromatizität
+- Stereozentren wahlweise mit R/S oder Stern (*) kennzeichnen; Hybridisierung und Aromatizität
 
 **Namen und Formeln**
 - Struktur aus dem Namen (IUPAC- und Trivialnamen) oder aus SMILES erzeugen

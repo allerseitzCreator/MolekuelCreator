@@ -282,7 +282,7 @@
         <span class="segs" id="gridBtns"><button data-grid="off">Aus</button><button data-grid="square" title="Quadratisches Raster">□</button><button data-grid="hex" title="Chemie-Raster: 30°/60°/120°-Winkel, Zickzack-Ketten und Sechsringe">⬡</button></span>
         <button id="snapAll" title="Ausgewählte Atome (ohne Auswahl: alle) und Pfeile ans Raster setzen">Ausrichten</button></div>
       <div class="gridrow"><span>Schrift</span><select id="fontSel" title="Schriftart aller Elementsymbole, Indizes und Ladungen" style="flex:1;min-width:0"></select></div>
-      <label class="check"><input type="checkbox" id="rsCheck"> R/S-Kennzeichnung anzeigen</label>
+      <div class="gridrow" title="Asymmetrische C-Atome (Stereozentren) kennzeichnen: gar nicht, mit R/S (CIP-Konvention) oder mit Stern *"><span>Stereozentren</span><span class="segs" id="rsSeg" style="flex:1"><button data-rs="off">keine</button><button data-rs="rs">R/S</button><button data-rs="star">✱ Stern</button></span></div>
       <label class="check" style="margin-top:2px" title="Aromatische Ringe (Benzol, Pyridin, Naphthalin, Furan …) mit Kreis für die delokalisierten π-Elektronen statt abwechselnder Doppelbindungen"><input type="checkbox" id="aromCheck"> Aromaten als Ring (delokalisiert)</label>
       <label class="check" style="margin-top:2px" title="Freie Elektronenpaare an allen Atomen zeigen – einzelne Atome: auswählen und in der Leiste „Freie e⁻-Paare“"><input type="checkbox" id="lpCheck"> Freie Elektronenpaare (alle Atome)</label>
       <label class="check" style="margin-top:2px" title="Bei Kohlenhydraten die C-Atome der Kette durchnummerieren (C1 = Carbonyl- bzw. anomeres C); bei Di- und Polysacchariden für jeden Baustein getrennt – in jeder Darstellung"><input type="checkbox" id="cnumCheck"> C-Atome nummerieren (Kohlenhydrate)</label>
@@ -445,7 +445,7 @@
       <div class="keys">
         <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
-        <b style="color:var(--ink);font-weight:500">Stereozentren:</b> asymmetrische C-Atome tragen R/S bzw. * (noch nicht festgelegt). Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
+        <b style="color:var(--ink);font-weight:500">Stereozentren:</b> unter „Darstellung“ wählen: keine Kennzeichnung, R/S (bzw. * solange die Konfiguration offen ist) oder ✱ Stern an jedem asymmetrischen C-Atom. Beispiele und Namen erscheinen zunächst als Valenzstrichformel ohne Kennzeichnung. Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
         <b style="color:var(--ink);font-weight:500">Mesomere Grenzformeln:</b> Hat das Molekül mehrere Grenzformeln (z. B. Benzol, Carboxylat, Nitrogruppe, Allylkation, Amid), erscheint rechts ein Auswahlmenü. Am Aromaten wird der mesomere Effekt berücksichtigt: +M-Substituenten (–OH, –NH₂, –O⁻, Halogene) erzeugen negative Ladungen in ortho/para-Stellung, −M-Substituenten (–NO₂, –CHO, –COOH, –COR, –CN) positive Ladungen in ortho/para-Stellung. Unrealistische Formeln werden weggelassen: keine positive Ladung am C der C=O-/C≡N-Gruppe und kein O⁺ an –OH/–OR von Säuren und Estern; positive Ladungen an O, S oder Halogen nur, wenn das Atom sein Elektronenpaar in einen Ring oder eine C=C-Doppelbindung abgibt. Im Menü: dort eine Grenzformel wählen (das Molekül wird umgezeichnet) oder „Alle nebeneinander zeichnen“ – mit Mesomeriepfeilen, jeder Schritt eine Elektronenverschiebung. Bei mehreren Molekülen gilt es für das ausgewählte, sonst für das größte.<br>
         <b style="color:var(--ink);font-weight:500">Aromaten als Ring:</b> unter „Darstellung“ (oder bei den Grenzformeln) „Aromaten als Ring (delokalisiert)“ – aromatische Ringe zeigen dann einen Kreis für die delokalisierten π-Elektronen statt abwechselnder Doppelbindungen (Benzol, Pyridin, Naphthalin, Furan, Pyrrol, Thiophen …). Geladene Ringe: beim σ-Komplex (ein sp³-C, z. B. nach Angriff von Br⁺ am Benzol) erscheint ein gestrichelter Bogen über die fünf übrigen C-Atome mit ⊕ in der Ringmitte, bei Tropylium-Kation und Cyclopentadienid-Anion ein Kreis mit ⊕ bzw. ⊖ (anklickbar zum Färben oder Radieren). Für ein einzelnes Molekül (z. B. eine Grenzformel): Molekül per Doppelklick auswählen → in der Leiste „◯ Delokalisiert (Ring)“ bzw. „⌬ Doppelbindungen“. Das Häkchen unter „Darstellung“ stellt alle Moleküle gemeinsam um.<br>
         <b style="color:var(--ink);font-weight:500">Beispiele:</b> oben „Beispiele ▾“ öffnen, Stoffgruppe wählen (Kohlenwasserstoffe, Alkohole, Aldehyde, Ketone, Carbonsäuren, Ester, Ether, Kohlenhydrate, Aminosäuren, Kunststoffe, Proteine) und Molekül anklicken. Beispiele und Moleküle aus der Namenseingabe werden rechts neben die vorhandene Zeichnung gesetzt (ausgewählt, zum Verschieben); „Alles löschen“ leert die Fläche.<br>
@@ -2561,7 +2561,7 @@ let arrowType = 'reaction', arrowDashed = false, arrowHead = 2, arrowWidth = 2, 
 // gewählte Pfeilspitze je Pfeilart (Standard: Reaktion/Mesomerie gefüllt, Gleichgewicht halb, Elektronenverschiebung Dreieck)
 const HS_DEF = {reaction: 'full', resonance: 'full', equilibrium: 'halfU', curved: 'tri'}, arrowHS = {};
 let tool = 'draw', element = 'C', bondOrder = 1, bondStereo = null, ring = null;
-let display = {mode: 'skeletal', lp: true, lpStyle: 'bar', rs: true, showC: false, grid: 'off', arom: false, cnum: false};
+let display = {mode: 'skeletal', lp: true, lpStyle: 'bar', rs: true, star: false, showC: false, grid: 'off', arom: false, cnum: false};
 try { display.arom = localStorage.getItem('molzeichner-arom') === '1'; display.cnum = localStorage.getItem('molzeichner-cnum') === '1'; } catch (e) {}
 let hPos = [];            // Positionen der explizit gezeichneten H-Atome (Strukturformel)
 let chPos = [], rdPos = [];
@@ -2880,7 +2880,9 @@ const textW = s => [...s].reduce((t, c) => t + charW(c), 0);
 const chargeStr = c => c === 0 ? '' : (Math.abs(c) > 1 ? Math.abs(c) : '') + (c > 0 ? '+' : '−');
 
 const VE = {H: 1, B: 3, C: 4, Si: 4, N: 5, P: 5, O: 6, S: 6, F: 7, Cl: 7, Br: 7, I: 7};
-const HL = 36; // Länge der Bindung zu explizit gezeichneten H-Atomen (kurz)
+const HL = 36; // Bindungslänge „kurz“
+const STRUCT_BL = 56; // Gerüstbindungen der Valenzstrichformel („lang“): Platz für die H-Atome benachbarter Atome auf dem Kreuz
+const HLS = 30; // Bindung zu den einzeln gezeichneten H-Atomen der Valenzstrichformel („sehr kurz“) – so passen auch an benachbarten sp³-Atomen alle H auf das rechtwinklige Kreuz
 const TAU = 2 * Math.PI;
 const normA = x => ((x % TAU) + TAU) % TAU;
 
@@ -2975,7 +2977,7 @@ function relaxH(info, HID) {
   const vis = atoms.filter(a => !HID.has(a.id));
   const segs = bonds.filter(b => !HID.has(b.a) && !HID.has(b.b)).map(b => ({a: b.a, b: b.b, A: atomById(b.a), B: atomById(b.b)}));
   const hp = new Map();   // atom.id → [{x, y}]
-  const place = (a, angs) => angs.map(t => ({x: a.x + HL * Math.cos(t), y: a.y + HL * Math.sin(t)}));
+  const place = (a, angs) => angs.map(t => ({x: a.x + HLS * Math.cos(t), y: a.y + HLS * Math.sin(t)}));
   for (const a of vis) { const li = info.get(a.id); if (li.hAng.length) hp.set(a.id, place(a, li.hAng)); }
   const dSeg = (px, py, A, B) => { const dx = B.x - A.x, dy = B.y - A.y, L2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((px - A.x) * dx + (py - A.y) * dy) / L2)); return Math.hypot(A.x + dx * t - px, A.y + dy * t - py); };
   // Freiraum eines H (Lage q, gebunden an a): Abstand zu Atomen, fremden H, fremden Bindungen; Bindung a–H zu fremden Atomen/H
@@ -2992,16 +2994,16 @@ function relaxH(info, HID) {
     li.hAng.forEach((t0, k) => {
       if (room(a, L[k], k) >= 1) return;
       const own = [...li.bondAng, ...li.hAng.filter((x, j) => j !== k)];
-      let best = t0, bl = HL, bs = room(a, L[k], k);
+      let best = t0, bl = HLS, bs = room(a, L[k], k);
       // kurze Bindung bevorzugt; nur wenn kein Platz ist, mittlere Länge
-      for (const len of [HL, BL]) for (let i = 0; i < 72; i++) {
+      for (const len of [HLS, HL]) for (let i = 0; i < 72; i++) {
         const t = i * TAU / 72;
         if (own.some(u => Math.abs(Math.atan2(Math.sin(t - u), Math.cos(t - u))) < 0.62)) continue;
         const q = {x: a.x + len * Math.cos(t), y: a.y + len * Math.sin(t)};
-        const sc = Math.min(room(a, q, k), 1.2) - 0.02 * Math.abs(Math.atan2(Math.sin(t - t0), Math.cos(t - t0))) - (len > HL ? 0.25 : 0);
+        const sc = Math.min(room(a, q, k), 1.2) - 0.02 * Math.abs(Math.atan2(Math.sin(t - t0), Math.cos(t - t0))) - (len > HLS ? 0.25 : 0) - (Math.abs(Math.sin(2 * t)) > 0.05 ? 0.1 : 0);
         if (sc > bs + 0.05) { bs = sc; best = t; bl = len; }
       }
-      if (best !== t0 || bl !== HL) { li.hAng[k] = best; (li.hLen = li.hLen || [])[k] = bl; L[k] = {x: a.x + bl * Math.cos(best), y: a.y + bl * Math.sin(best)}; }
+      if (best !== t0 || bl !== HLS) { li.hAng[k] = best; (li.hLen = li.hLen || [])[k] = bl; L[k] = {x: a.x + bl * Math.cos(best), y: a.y + bl * Math.sin(best)}; }
     });
   }
 }
@@ -3238,7 +3240,7 @@ function molMarkup() {
     const c = Math.cos(ang), s = Math.sin(ang);
     // verschobene H-Atome: Versatz addieren
     const ho = a.hOff?.[k] || {x: 0, y: 0};
-    const hl = info.get(a.id).hLen?.[k] ?? HL;
+    const hl = info.get(a.id).hLen?.[k] ?? HLS;
     const tx = a.x + c * hl + ho.x, ty = a.y + s * hl + ho.y, Lh = Math.hypot(tx - a.x, ty - a.y) || 1, ux = (tx - a.x) / Lh, uy = (ty - a.y) / Lh;
     // Strich endet vor dem H-Symbol (schräg: Ecke des Buchstabens beachten)
     const gh = Math.max(8, rayExit([[-6.2, -6.6, 6.2, 6.2]], -ux, -uy) + 2.2);
@@ -3451,7 +3453,7 @@ function molMarkup() {
       rsAng.set(a.id, ang);
       const x = a.x + d * Math.cos(ang), y = a.y + d * Math.sin(ang) + 4;
       rsPos.push({x, y: y - 4, r: 7});
-      out += a.cip
+      out += a.cip && !display.star
         ? `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" font-size="11.5" font-style="italic" font-weight="600" text-anchor="middle" fill="#7c3aed" font-family="${FF()}">${a.cip}</text>`
         : `<text x="${x.toFixed(2)}" y="${(y + 2).toFixed(2)}" font-size="15" text-anchor="middle" fill="#7c3aed" font-family="${FF()}">*</text>`;
     }
@@ -3969,7 +3971,7 @@ function structWedges(info) {
     const subs = [];
     for (const b of bondsOf(a.id)) { if (b.order !== 1) { subs.length = 0; break; } const o = atomById(otherEnd(b, a.id)); const dx = o.x - a.x, dy = o.y - a.y, l = Math.hypot(dx, dy) || 1; subs.push({key: b.id, id: o.id, x: dx / l, y: dy / l, heavy: true}); }
     if (subs.length !== bondsOf(a.id).length) continue;
-    li.hAng.forEach((ang, k) => { const ho = a.hOff?.[k] || {x: 0, y: 0}; const dx = Math.cos(ang) * HL + ho.x, dy = Math.sin(ang) * HL + ho.y, l = Math.hypot(dx, dy) || 1; subs.push({key: 'h' + a.id + ':' + k, id: null, x: dx / l, y: dy / l, heavy: false}); });
+    li.hAng.forEach((ang, k) => { const ho = a.hOff?.[k] || {x: 0, y: 0}; const dx = Math.cos(ang) * HLS + ho.x, dy = Math.sin(ang) * HLS + ho.y, l = Math.hypot(dx, dy) || 1; subs.push({key: 'h' + a.id + ':' + k, id: null, x: dx / l, y: dy / l, heavy: false}); });
     if (subs.length !== 4) continue;
     // Ebene: das Paar aus zwei schweren Atomen, das sich am stärksten gegenüberliegt
     let best = null;
@@ -4407,7 +4409,7 @@ function fischerMarkup() {
     const a = atomById(r.id);
     if (display.showC || (r.right && r.right.double && !r.left) || (a && (a.color || a.charge || a.showLabel))) o += `<text x="${Pk.x}" y="${Pk.y + 5.6}" text-anchor="middle" fill="${labelColor(r.id)}">C${a && a.charge ? `<tspan font-size="11" dy="-7">${chargeStr(a.charge)}</tspan>` : ''}</text>`;
     if (r.isCenter && display.rs) projRS.push({x: Pk.x + 13, y: Pk.y - 11, r: 8});
-    if (r.isCenter && display.rs) o += `<text x="${Pk.x + (display.showC ? 12 : 9)}" y="${Pk.y - (display.showC ? 10 : 7)}" font-size="11.5" font-style="italic" font-weight="600" fill="#7c3aed">${r.cip}</text>`;
+    if (r.isCenter && display.rs) o += `<text x="${Pk.x + (display.showC ? 12 : 9)}" y="${Pk.y - (display.showC ? 10 : 7)}" font-size="${display.star ? 15 : 11.5}" font-style="${display.star ? 'normal' : 'italic'}" font-weight="600" fill="#7c3aed">${display.star ? '*' : r.cip}</text>`;
     projHits.push({type: 'node', x: Pk.x, y: Pk.y, id: r.id, center: r.isCenter, mkey: 'a' + r.id});
   });
   o += '</g>' + ringSvg + lps;
@@ -4582,7 +4584,7 @@ function haworthRing(ringAtoms, off) {
     if (a.down && !a.down.link && !isSide(a, a.down)) { o += hLine(a.sx, a.sy + gap, a.sx, a.sy + downLen(a) + (display.showC ? 4 : 0), a.id, a.down.id); seg(a.sy + gap, a.sy + downLen(a)); }
   }
   o += '</g><g font-family="' + FF() + '" font-weight="500" font-size="16">';
-  const cipText = (x, y, d, cip) => (projRS.push({x: x + d.x, y: y + d.y, r: 8}), '') + `<text x="${(x + d.x).toFixed(1)}" y="${(y + d.y + 4).toFixed(1)}" text-anchor="${d.x > 3 ? 'start' : d.x < -3 ? 'end' : 'middle'}" font-size="10.5" font-style="italic" font-weight="600" fill="#7c3aed">${cip}</text>`;
+  const cipText = (x, y, d, cip) => (projRS.push({x: x + d.x, y: y + d.y, r: 8}), '') + `<text x="${(x + d.x).toFixed(1)}" y="${(y + d.y + 4).toFixed(1)}" text-anchor="${d.x > 3 ? 'start' : d.x < -3 ? 'end' : 'middle'}" font-size="${display.star ? 14 : 10.5}" font-style="${display.star ? 'normal' : 'italic'}" font-weight="600" fill="#7c3aed">${display.star ? '*' : cip}</text>`;
   // Seitenkette aufgefächert darstellen (z. B. C5 der Glucofuranose): Kreuz wie in der Fischer-Projektion
   const sideChain = (a, lbl, dir) => {
     if (!isSide(a, lbl)) return false;
@@ -4612,7 +4614,7 @@ function haworthRing(ringAtoms, off) {
     arm(L, -1); arm(Rt, 1);
     const g = hLabel(TP(xs, ys + dir * CONT), TD(0, dir), txt(next.id), labelColor(next.id), {id: next.id, from: X.id}, next.id, false, true);
     o += g.svg; hlps += g.lp;
-    if (ctr && display.rs && X.cip) { const d = TP(11, -10); o += cipText(C0.x, C0.y, d, X.cip); }
+    if (ctr && display.rs && (X.cip || display.star)) { const d = TP(11, -10); o += cipText(C0.x, C0.y, d, X.cip); }
     projHits.push({type: 'node', x: C0.x, y: C0.y, id: X.id, center: !!ctr});
     if (ctr) haworthExt++;
     return true;
@@ -4822,7 +4824,7 @@ function replaceTarget(t, el) {
 const topoKey = () => atoms.map(a => a.id + a.el).join(',') + '|' + bonds.map(b => b.a + '-' + b.b + ':' + b.order).join(',');
 function orthoLayout(shortFG = true) {
   // Gerüst: mittlere Bindungslänge; funktionelle Gruppen (OH, =O, NH₂, Cl …): kurze Bindung
-  const S = BL, pos = new Map(), occ = new Set();
+  const S = shortFG ? STRUCT_BL : BL, pos = new Map(), occ = new Set();
   const fgAtom = new Set();
   try { const {g, idx} = modelGraph(); const rev = new Map([...idx].map(([id, i]) => [i, id])); for (const fg of Chem.functionalGroups(g)) fg.members.forEach(m => fgAtom.add(rev.get(m))); } catch (e) {}
   // Peptid: Hauptkette waagrecht (N-Terminus links), Reste senkrecht nach oben/unten
@@ -4870,7 +4872,16 @@ function orthoLayout(shortFG = true) {
     }
     const queue = [];
     const inDir = new Map();
-    if (sysOf.has(start)) { placeSystem(start, offX, 0, null).forEach(id => queue.push(id)); }
+    if (sysOf.has(start)) {
+      // Ring zuerst: so drehen, dass der größte Substituent waagrecht/senkrecht abgeht (dann liegen auch seine Bindungen auf dem Kreuz)
+      const ids = sysAtoms(sysOf.get(start)); let att = null, big = 0;
+      for (const id of ids) for (const n of neighbors(id)) if (!sysOf.has(n.id) || sysOf.get(n.id) !== sysOf.get(start)) { const z = size(n.id, id); if (z > big) { big = z; att = id; } }
+      if (att !== null) {
+        let cx = 0, cy = 0; ids.forEach(id => { const q = skelXY(id); cx += q.x; cy += q.y; }); cx /= ids.length; cy /= ids.length;
+        const av = skelXY(att), out = Math.atan2(av.y - cy, av.x - cx), snap = Math.round(out / (Math.PI / 2)) * Math.PI / 2;
+        placeSystem(att, offX, 0, snap + Math.PI).forEach(id => queue.push(id));
+      } else placeSystem(start, offX, 0, null).forEach(id => queue.push(id));
+    }
     else { pos.set(start, {x: offX, y: 0}); occ.add(cell(offX, 0)); inDir.set(start, 0); queue.push(start); }
     while (queue.length) {
       const u = queue.shift(), pu = pos.get(u);
@@ -5415,7 +5426,7 @@ function bboxMol(pad) {
 function bboxOwn(pad) {
   if (!atoms.length) return null;
   if (isProj(display.mode) && projBox) return {...projBox};
-  pad += (display.mode === 'struct' ? HL : 0) + (display.lp || atoms.some(a => a.lp) ? 8 : 0);
+  pad += (display.mode === 'struct' ? HLS : 0) + (display.lp || atoms.some(a => a.lp) ? 8 : 0);
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const a of atoms) { x0 = Math.min(x0, a.x); y0 = Math.min(y0, a.y); x1 = Math.max(x1, a.x); y1 = Math.max(y1, a.y); }
   return {x: x0 - pad, y: y0 - pad, w: x1 - x0 + 2 * pad, h: y1 - y0 + 2 * pad};
@@ -7430,11 +7441,11 @@ function syncDisplayUI() {
   document.querySelectorAll('#modeBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.mode === display.mode));
   document.querySelectorAll('#lpStyleBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.lp === display.lpStyle));
   document.getElementById('lpCheck').checked = display.lp;
-  document.getElementById('rsCheck').checked = display.rs;
+  document.querySelectorAll('#rsSeg button').forEach(b => b.classList.toggle('on', b.dataset.rs === (!display.rs ? 'off' : display.star ? 'star' : 'rs')));
   document.getElementById('aromCheck').checked = !!display.arom;
   document.getElementById('cnumCheck').checked = !!display.cnum;
   document.querySelectorAll('#gridBtns button').forEach(b => b.classList.toggle('on', b.dataset.grid === (display.grid || 'off')));
-  document.getElementById('fRS').textContent = display.rs ? 'R/S ausblenden' : 'R/S einblenden';
+  document.getElementById('fRS').textContent = (display.star ? '✱ ' : 'R/S ') + (display.rs ? 'ausblenden' : 'einblenden');
   document.getElementById('fC').textContent = display.showC ? 'C-Atome ausblenden' : 'C-Atome zeigen';
   document.getElementById('lpStyleBtns').classList.toggle('off', !display.lp);
 }
@@ -7549,7 +7560,7 @@ function switchRingSize(size) {
   fitView(); toast(msg);
 }
 function leaveFischer() { if (isProj(display.mode)) setDisplay({mode: isProj(prevMode) ? 'skeletal' : prevMode}); }
-document.getElementById('rsCheck').onchange = e => setDisplay({rs: e.target.checked});
+document.querySelectorAll('#rsSeg button').forEach(b => b.onclick = () => setDisplay({rs: b.dataset.rs !== 'off', star: b.dataset.rs === 'star'}));
 document.getElementById('cnumCheck').onchange = e => { display.cnum = e.target.checked; try { localStorage.setItem('molzeichner-cnum', display.cnum ? '1' : '0'); } catch (er) {} render(); };
 document.getElementById('aromCheck').onchange = e => { display.arom = e.target.checked; atoms.forEach(a => delete a.aromDisp); try { localStorage.setItem('molzeichner-arom', display.arom ? '1' : '0'); } catch (er) {} render(); updateInfo(); };
 document.querySelectorAll('#gridBtns button').forEach(b => b.onclick = () => { setDisplay({grid: b.dataset.grid}); drawGrid(); });
@@ -7950,19 +7961,12 @@ function insertGraph(res) {
   const N = {atoms, bonds, view: 'skeletal', coords: 'skel'};
   atoms = sa; bonds = sb;
   lastInserted = ids;
-  const mode = display.mode;
-  let shown = mode;
-  if (isProj(mode)) {
-    // Projektion: das neue Molekül wird bearbeitet, die vorhandenen bleiben, wie sie sind
-    const t = inScope(N, () => { display.mode = mode; return prepareProj(mode); });
-    if (t.ok) { N.view = mode; setActive([N], [...activeFrags(), ...parked], mode); if (t.msg) setTimeout(() => toast(t.msg), 0); }
-    else { shown = 'skeletal'; const all = [...activeFrags(), ...parked]; setActive([N, ...all.filter(f => f.view === 'skeletal')], all.filter(f => f.view !== 'skeletal'), 'skeletal'); syncDisplayUI(); }
-  } else {
-    N.view = mode;
-    inScope(N, () => syncCoords());
-    atoms.push(...N.atoms); bonds.push(...N.bonds);
-    projOff.coords = coordsOf(mode);
-  }
+  // neue Moleküle (Beispiel, Name, SMILES) erscheinen zuerst als Valenzstrichformel – ohne R/S bzw. Sterne
+  const shown = 'struct';
+  const all = keep ? [...activeFrags(), ...parked] : [];
+  setActive([N, ...all.filter(f => f.view === shown)], all.filter(f => f.view !== shown), shown);
+  display.rs = false;
+  syncDisplayUI();
   if (keep && tool !== 'select') setTool('select');
   if (keep && !isProj(shown)) { ids.forEach(id => sel.add('a:' + id)); bonds.forEach(b => { if (ids.includes(b.a)) sel.add('b:' + b.id); }); }
   changed(); fitView();
