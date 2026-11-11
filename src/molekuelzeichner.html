@@ -49,6 +49,7 @@
   .eqArrows svg{width:34px;height:22px}
   .eqPrev{background:#fff;border-radius:8px;min-height:62px;padding:6px 10px;overflow-x:auto;display:flex;align-items:center}
   .eqPrev svg{display:block}
+  .eqHit{fill:transparent;stroke:transparent;cursor:pointer}.eqHit:hover{fill:#2563eb14;stroke:#2563eb66}.eqHit.on{fill:#2563eb1f;stroke:#2563eb}
   .eqFoot{display:flex;gap:12px;align-items:flex-end}
   .eqFoot .eqHelp{flex:1}
   .eqBtns{display:flex;gap:6px}.eqBtns button{padding:7px 16px}
@@ -388,7 +389,7 @@
       <div class="eqArrows" id="eqArrows" title="Pfeil an der Schreibmarke einfügen"></div>
       <div id="eqPrev" class="eqPrev"></div>
       <div class="eqFoot">
-        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔.</div>
+        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>=</b> oder <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔. Pfeil ändern: Pfeil in der Vorschau anklicken (oder Schreibmarke daneben setzen) und oben einen anderen Pfeil wählen.</div>
         <div class="eqBtns"><button id="eqCancel">Abbrechen</button><button id="eqOk" class="primary">Einfügen</button></div>
       </div>
     </div>
@@ -1674,7 +1675,8 @@ const isMark = a => a && (a.type === 'bracket' || a.type === 'rect' || a.type ==
 /* ---------- Reaktionsgleichungen (Text mit automatisch tief-/hochgestellten Zahlen und gezeichneten Pfeilen) ---------- */
 const EQ_ARROWS = {'→': {type: 'reaction'}, '⇌': {type: 'equilibrium'}, '↔': {type: 'resonance'}, '↷': {type: 'curved'}, '⇢': {type: 'reaction', dashed: true}};
 const EQ_SIZE = 20;
-function eqNormalize(t) { return t.replace(/<=>/g, '⇌').replace(/<->/g, '↔').replace(/-->/g, '→').replace(/->/g, '→'); }
+// „=“ wird zum Reaktionspfeil; „<=>“ (beim Tippen zunächst „<→“ + „>“) zum Gleichgewichtspfeil
+function eqNormalize(t) { return t.replace(/<=>/g, '⇌').replace(/<→>/g, '⇌').replace(/<->/g, '↔').replace(/-->/g, '→').replace(/->/g, '→').replace(/=/g, '→'); }
 // Zerlegen: Koeffizienten normal, Zahlen hinter Symbolen tief, Zahl+Ladung hoch, „4;2-“ gestapelt
 function eqTokens(src) {
   const s = eqNormalize(src), out = [];
@@ -1685,14 +1687,16 @@ function eqTokens(src) {
   for (let i = 0; i < s.length;) {
     const c = s[i];
     if (/\s/.test(c)) { if (out.length && out[out.length - 1].k !== 'sp') out.push({k: 'sp'}); ctx = false; i++; continue; }
-    if (c in EQ_ARROWS) { out.push({k: 'arrow', a: c}); ctx = false; i++; continue; }
+    if (c in EQ_ARROWS) { out.push({k: 'arrow', a: c, src: i}); ctx = false; i++; continue; }
     if (/\d/.test(c)) {
       let j = i; while (j < s.length && /\d/.test(s[j])) j++;
       const num = s.slice(i, j), m = s.slice(j).match(/^;(\d*)([+\-−])/);
       if (ctx && m) { out.push({k: 'stack', sub: num, sup: m[1] + sg(m[2])}); i = j + m[0].length; continue; }
       if (ctx && '+-−'.includes(s[j] || 'x') && isEnd(s[j + 1])) { out.push({k: 'sup', t: num + sg(s[j])}); i = j + 1; continue; }
       if (ctx) { out.push({k: 'sub', t: num}); i = j; continue; }
-      pushN(num); i = j; continue;   // Koeffizient
+      // stöchiometrische Zahl (auch 1/2)
+      const mc = s.slice(i).match(/^\d+(?:[\/,.]\d+)?/);
+      out.push({k: 'coef', t: mc[0]}); i += mc[0].length; continue;
     }
     if ('+-−'.includes(c)) {
       if (ctx && isEnd(s[i + 1])) { out.push({k: 'sup', t: sg(c)}); i++; continue; }
@@ -1708,14 +1712,21 @@ let eqCv = null;
 const eqW = (t, px) => { eqCv = eqCv || document.createElement('canvas').getContext('2d'); eqCv.font = px + 'px ' + FF(); return eqCv.measureText(t).width; };
 // Lage aller Teile (relativ zum Anfang der Grundlinie)
 function eqLayout(text, size = EQ_SIZE) {
-  const it = [], sm = size * 0.66, aw = size * 2.3, gap = size * 0.55;
+  const it = [], sm = size * 0.66, aw = size * 2.3, gap = size * 0.7;
   let x = 0, prevArrowOrOp = true;
   const T = eqTokens(text);
   for (let i = 0; i < T.length; i++) {
     const t = T[i];
-    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow'))) x += size * 0.28; continue; }
-    if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw}); x += aw + gap; prevArrowOrOp = true; continue; }
-    if (t.k === 'op') { x += size * 0.38; it.push({k: 'n', t: '+', x, s: size, dy: 0}); x += eqW('+', size) + size * 0.38; prevArrowOrOp = true; continue; }
+    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'coef'))) x += size * 0.28; continue; }
+    if (t.k === 'coef') {
+      // kleiner Abstand zwischen stöchiometrischer Zahl und Formel (deutlich kleiner als vor „+“ bzw. Pfeil)
+      it.push({k: 'n', t: t.t, x, s: size, dy: 0, arrowAt: undefined}); x += eqW(t.t, size);
+      let j = i + 1; while (T[j] && T[j].k === 'sp') j++;
+      if (T[j] && T[j].k !== 'op' && T[j].k !== 'arrow') x += size * 0.16;
+      continue;
+    }
+    if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw, src: t.src}); x += aw + gap; prevArrowOrOp = true; continue; }
+    if (t.k === 'op') { x += size * 0.5; it.push({k: 'n', t: '+', x, s: size, dy: 0}); x += eqW('+', size) + size * 0.5; prevArrowOrOp = true; continue; }
     if (t.k === 'n') { it.push({k: 'n', t: t.t, x, s: size, dy: 0}); x += eqW(t.t, size); }
     else if (t.k === 'sub') { it.push({k: 'n', t: t.t, x, s: sm, dy: size * 0.3}); x += eqW(t.t, sm); }
     else if (t.k === 'sup') { it.push({k: 'n', t: t.t, x, s: sm, dy: -size * 0.45}); x += eqW(t.t, sm); }
@@ -1727,15 +1738,16 @@ function eqLayout(text, size = EQ_SIZE) {
 function eqBox(a) { const s = a.size || EQ_SIZE; return {x0: a.x1 - 2, y0: a.y1 - s * 1.05, x1: a.x2 + 2, y1: a.y1 + s * 0.55}; }
 function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328') {
   const L = eqLayout(text, size), f = v => v.toFixed(1), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  let o = '';
+  let o = ''; const arrs = [];
   for (const q of L.it) {
+    if (q.k === 'arrow') arrs.push({x: x0 + q.x, w: q.w, src: q.src});
     if (q.k === 'n') { o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${col}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
     const A = EQ_ARROWS[q.a], ay = y0 - size * 0.32, xa = x0 + q.x, xb = x0 + q.x + q.w;
     const t = {type: A.type, x1: xa, y1: ay, x2: xb, y2: ay, width: Math.max(1.4, size / 12), dashed: !!A.dashed, color: col};
     if (A.type === 'curved') { t.y1 = t.y2 = y0 + size * 0.05; t.c1x = xa + q.w * 0.25; t.c1y = y0 - size * 0.9; t.c2x = xa + q.w * 0.75; t.c2y = y0 - size * 0.9; }
     o += arrowSVG(t);
   }
-  return {svg: o, w: L.w};
+  return {svg: o, w: L.w, arrows: arrs};
 }
 function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328'); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
 function makeArrow(type, x1, y1, x2, y2) {
@@ -5319,16 +5331,30 @@ let eqEditing = null;
     const ic = icons[ch] && document.querySelector(icons[ch]);
     b.innerHTML = ic ? ic.outerHTML : '<svg viewBox="0 0 28 24"><line x1="3" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3.5 2.5"/><polygon points="25,12 18,8.5 19.5,12 18,15.5" fill="currentColor"/></svg>';
     b.onmousedown = e => e.preventDefault();
-    b.onclick = () => { const a = inp.selectionStart ?? inp.value.length, z = inp.selectionEnd ?? a; inp.setRangeText(' ' + ch + ' ', a, z, 'end'); inp.value = inp.value.replace(/ {2,}/g, ' '); inp.focus(); upd(); };
+    b.onclick = () => {
+      // steht an der Schreibmarke schon ein Pfeil (bzw. ist er markiert), wird er ersetzt – sonst eingefügt
+      const v = inp.value, a = inp.selectionStart ?? v.length, z = inp.selectionEnd ?? a;
+      const isA = c => c && c in EQ_ARROWS;
+      let at = -1;
+      if (z - a === 1 && isA(v[a])) at = a;
+      else if (a === z) { for (const k of [a - 1, a, a - 2, a + 1]) if (isA(v[k])) { at = k; break; } }
+      if (at >= 0) { inp.setRangeText(ch, at, at + 1, 'end'); inp.setSelectionRange(at, at + 1); }
+      else { inp.setRangeText(' ' + ch + ' ', a, z, 'end'); inp.value = inp.value.replace(/ {2,}/g, ' '); }
+      inp.focus(); upd();
+    };
     box.appendChild(b);
   }
   const upd = () => {
     const pos = inp.selectionStart, v = eqNormalize(inp.value);
     if (v !== inp.value) { const d = inp.value.length - v.length; inp.value = v; inp.setSelectionRange(Math.max(0, pos - d), Math.max(0, pos - d)); }
-    const r = eqMarkup(inp.value, 6, 40, 26);
-    prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="58" viewBox="0 0 ${Math.ceil(r.w + 14)} 58">${r.svg}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
+    const r = eqMarkup(inp.value, 6, 40, 26), selA = inp.selectionEnd - inp.selectionStart === 1 ? inp.selectionStart : -1;
+    // Pfeile in der Vorschau anklickbar: markiert den Pfeil im Eingabefeld, ein Pfeilknopf ersetzt ihn dann
+    const hits = r.arrows.map(q => `<rect class="eqHit${q.src === selA ? ' on' : ''}" data-src="${q.src}" x="${q.x - 4}" y="10" width="${q.w + 8}" height="40" rx="6"><title>Pfeil anklicken und oben einen anderen Pfeil wählen</title></rect>`).join('');
+    prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="58" viewBox="0 0 ${Math.ceil(r.w + 14)} 58">${r.svg}${hits}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
   };
   inp.addEventListener('input', upd);
+  inp.addEventListener('select', upd); inp.addEventListener('keyup', upd); inp.addEventListener('click', upd);
+  prev.addEventListener('click', e => { const h = e.target.closest('.eqHit'); if (!h) return; const k = +h.dataset.src; inp.focus(); inp.setSelectionRange(k, k + 1); upd(); });
   inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eqOk').click(); } if (e.key === 'Escape') eqClose(); });
   window.eqOpen = a => {
     eqEditing = a || null;
