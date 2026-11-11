@@ -42,6 +42,10 @@ Ein Molekül-Zeichenprogramm für den Chemieunterricht, das komplett im Browser 
 - Alkane, Alkohole, Carbonsäuren, Aromaten, Zucker, Aminosäuren, Peptide, Fette, Steroide
 - Kunststoffe wie PE, PVC, PET, Nylon, Polycarbonat und Polyurethan
 
+**Reaktionsgleichungen**
+- Eingabe mit Summenformeln; Zahlen werden automatisch tief- bzw. hochgestellt (H2O, Fe3+, SO4;2-)
+- Reaktions-, Gleichgewichts-, Mesomerie- und gebogener Pfeil sowie gestrichelter Pfeil
+
 **Export**
 - PNG und SVG mit frei wählbarem Dateinamen
 

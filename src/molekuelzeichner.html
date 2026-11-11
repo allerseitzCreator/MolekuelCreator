@@ -39,6 +39,16 @@
   .primary{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important;font-weight:500}
   .primary:disabled{opacity:.6}
   .namemsg{font-size:13px;color:var(--muted)}
+  #eqPanel{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  #eqPanel.hide{display:none}
+  #eqInput{width:100%;box-sizing:border-box;font-size:14px;padding:6px 8px}
+  .eqArrows{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+  .eqArrows button{padding:3px 2px;min-height:28px;display:flex;align-items:center;justify-content:center}
+  .eqArrows svg{width:28px;height:20px}
+  .eqPrev{background:#fff;border-radius:6px;min-height:38px;padding:4px;overflow-x:auto;display:flex;align-items:center}
+  .eqPrev svg{display:block}
+  .eqBtns{display:flex;gap:6px}.eqBtns button{flex:1}
+  .eqHelp{font-size:11.5px;line-height:1.4;color:var(--muted);font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0}
   .namemsg.err{color:#b91c1c}
   .namemsg.ok{color:#0b4f49}
   .namemsg.warn{color:#92400e}
@@ -357,6 +367,14 @@
     <div class="sect">
       <h2>Element</h2>
       <div class="grid g4" id="elBtns"></div>
+      <button class="tbtn" id="eqOpen" style="width:100%;margin-top:8px" title="Reaktionsgleichung mit Summenformeln eingeben – Zahlen werden automatisch tief- bzw. hochgestellt">Reaktionsgleichungen</button>
+      <div id="eqPanel" class="hide">
+        <input id="eqInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. 2 H2 + O2 -> 2 H2O">
+        <div class="eqArrows" id="eqArrows" title="Pfeil an der Schreibmarke einfügen"></div>
+        <div id="eqPrev" class="eqPrev"></div>
+        <div class="eqBtns"><button id="eqOk" class="primary">Einfügen</button><button id="eqCancel">Abbrechen</button></div>
+        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔.</div>
+      </div>
     </div>
   </aside>
 
@@ -375,6 +393,7 @@
         <button data-bs="none" title="normale Einfachbindung">—</button><button data-bs="wedge" title="Keil (zum Betrachter)">◀</button><button data-bs="hash" title="Strich (vom Betrachter weg)">┅</button><button data-bs="flip" title="Richtung umdrehen">⇄</button>
       </span>
       <button id="selInsCH2" class="hide" title="CH₂-Einheit in die ausgewählte Einfachbindung einschieben (Kette bzw. Ring wird um ein C-Atom verlängert)">+ CH₂ einschieben</button>
+      <button id="selEqEdit" class="hide" title="Reaktionsgleichung bearbeiten (oder Doppelklick auf die Gleichung)">✎ Gleichung bearbeiten</button>
       <button id="selDup" title="Ausgewählte Strukturformel(n) duplizieren – die Kopie erscheint rechts daneben (Strg+D)">⎘ Duplizieren</button>
       <button id="selDisp" class="hide" title="Rest als Strukturformel oder als Halbstrukturformel (z. B. CH₂CH₃) darstellen"></button>
       <button id="selSum" class="hide" title="Rest als Summenformel (z. B. C₂H₅) darstellen"></button>
@@ -454,6 +473,7 @@
         <b style="color:var(--ink);font-weight:500">Di-/Polysaccharide und Peptide:</b> einen Zucker so ziehen (an einer Bindung), dass die OH-Gruppe am anomeren C (C1, bei Fructose C2) über der gewünschten OH-Gruppe des anderen Zuckers liegt (z. B. an C4 für 1→4) – oder umgekehrt; grüne Punkte zeigen die Reaktion an. Beim Loslassen entsteht unter Wasserabspaltung das Vollacetal; die Brücke C–O–C wird als senkrechte gerade Linie gezeichnet und die Ringe entsprechend übereinander angeordnet (in der Haworth-Projektion wird der zweite Ring dafür ggf. gewendet). Das geht in Skelett-, Struktur- und Haworth-Darstellung; das Ergebnis erscheint in der Darstellung des ruhenden Moleküls. COOH einer Aminosäure an NH₂ einer anderen → Peptidbindung.<br><b style="color:var(--ink);font-weight:500">Kunststoffe (Verknüpfung beim Annähern):</b> Polykondensation – COOH an OH → Ester, COOH an NH₂ → Amid (–H₂O), COCl (z. B. Phosgen) an OH/NH₂ (–HCl); Polyaddition – N=C=O an OH → Urethan, N=C=O an NH₂ → Harnstoff (nichts wird abgespalten); Polymerisation – C=C an C=C bzw. an ein Radikal-Kettenende (•): Doppelbindungen öffnen sich, die Kettenenden tragen Radikale, zwei Radikal-Enden verbinden sich zum Kettenabbruch. <kbd>Umschalt</kbd> beim Loslassen: ohne Reaktion ablegen.<br>
         <b style="color:var(--ink);font-weight:500">C-Atome nummerieren:</b> unter „Darstellung“ „C-Atome nummerieren (Kohlenhydrate)“ – C1 ist das Carbonyl- bzw. anomere C (bei Ketosen C2); bei Di- und Polysacchariden wird jeder Baustein für sich nummeriert. Gilt in Skelett-, Struktur-, Fischer- und Haworth-Darstellung.<br>
         <b style="color:var(--ink);font-weight:500">Jedes Molekül in eigener Darstellung:</b> Skelett, Struktur, Fischer und Haworth gelten für die ausgewählten Moleküle (ohne Auswahl für die gerade bearbeiteten) – die übrigen behalten ihre Form. Ein Molekül in anderer Darstellung: Klick holt es zum Bearbeiten (der Klick wirkt gleich auf das getroffene Atom bzw. die Bindung), Ziehen verschiebt es, <kbd>Umschalt</kbd>-Klick wählt es als Ganzes aus (gestrichelter Rahmen). Alle Bearbeitungen (Elementsymbol einblenden, Reste als Halbstruktur- oder Summenformel, Rastung, Keile, Ladungen …) gelten für gezeichnete Moleküle genauso wie für Moleküle aus der Namenseingabe und den Beispielen und lassen sich zurücknehmen. Neue Moleküle erscheinen in der aktuellen Darstellung. Haworth → Fischer öffnet den Ring, Fischer → Haworth schließt ihn.<br>
+        <b style="color:var(--ink);font-weight:500">Reaktionsgleichungen:</b> unter „Element“ → „Reaktionsgleichungen“ die Gleichung mit Summenformeln eintippen (z. B. 2 H2 + O2 -> 2 H2O); die Pfeilknöpfe fügen →, ⇌, ↔, ↷ und den gestrichelten Pfeil ein. Zahlen hinter Symbolen werden tiefgestellt, Zahl mit + oder − dahinter hochgestellt (Fe3+), „4;2-“ setzt die Ladung über die tiefgestellte Zahl (SO4;2-). Die Gleichung lässt sich wie ein Pfeil verschieben, färben und löschen; Doppelklick oder „✎ Gleichung bearbeiten“ ändert den Text.<br>
         <b style="color:var(--ink);font-weight:500">Duplizieren:</b> ein Atom oder eine Bindung des Moleküls (oder mehrere Moleküle/Pfeile) auswählen → „⎘ Duplizieren“ (<kbd>Strg</kbd>+<kbd>D</kbd>). Das ganze Molekül wird in seiner Darstellung kopiert und rechts daneben eingesetzt; die Kopie ist ausgewählt und kann gleich verschoben werden.<br>
         <b style="color:var(--ink);font-weight:500">Gruppieren:</b> mehrere Moleküle und/oder Pfeile auswählen (Rahmen, <kbd>Umschalt</kbd>+Klick oder <kbd>Strg</kbd>+<kbd>A</kbd>) → „⧉ Gruppieren“ (<kbd>Strg</kbd>+<kbd>G</kbd>). Ein Klick auf einen Teil wählt dann die ganze Gruppe; sie wird gemeinsam verschoben, gedreht, gespiegelt, gefärbt oder gelöscht. „Gruppierung aufheben“ (<kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>G</kbd>) trennt sie wieder. Mit „Verschieben“ lassen sich einzelne Atome einer Gruppe weiterhin bearbeiten.<br>
         <b style="color:var(--ink);font-weight:500">Spiegeln:</b> „⇆ Spiegeln“ (links ↔ rechts) und „⇅ Spiegeln“ (oben ↔ unten) wirken auf die Auswahl – Moleküle und Pfeile –, ohne Auswahl auf alles. Ein gespiegeltes Molekül ist das Spiegelbild: Keile bleiben Keile, R und S tauschen. Das gilt auch für die Haworth-Projektion; die Schrift bleibt dabei lesbar.<br>
@@ -617,6 +637,7 @@ function mirror(axis) {
     for (const a of q) { if (H) a[kx] = 2 * ox - a[kx]; else a[ky] = 2 * oy - a[ky]; }
   }
   for (const a of ars) {
+    if (a.type === 'eq') { const w = a.x2 - a.x1, c = fx(a.x1 + w / 2), y = fy(a.y1); a.x1 = c - w / 2; a.x2 = c + w / 2; a.y1 = a.y2 = y; continue; }
     a.x1 = fx(a.x1); a.y1 = fy(a.y1); a.x2 = fx(a.x2); a.y2 = fy(a.y2);
     if (a.type === 'curved') { a.c1x = fx(a.c1x); a.c1y = fy(a.c1y); a.c2x = fx(a.c2x); a.c2y = fy(a.c2y); }
     if (a.type === 'bracket') for (const k of ['a1', 'a2']) if (a[k] !== undefined) a[k] = H ? Math.PI - a[k] : -a[k];
@@ -1583,6 +1604,7 @@ function hybOf(a, aromSet) {
 const arrowById = id => arrows.find(a => a.id === id);
 const bez = (a, t) => { const u = 1 - t; return {x: u * u * u * a.x1 + 3 * u * u * t * a.c1x + 3 * u * t * t * a.c2x + t * t * t * a.x2, y: u * u * u * a.y1 + 3 * u * u * t * a.c1y + 3 * u * t * t * a.c2y + t * t * t * a.y2}; };
 function arrowPoints(a) {
+  if (a.type === 'eq') { const b = eqBox(a); return [{k: 'p1', x: b.x0, y: b.y0}, {k: 'p2', x: b.x1, y: b.y1}]; }
   if (a.type === 'bracket') {
     // dritter Griff am Ende der zweiten Klammer: Länge der Klammern
     const g = bracketGeo(a, 2), sg = g.ny > 0 || (g.ny === 0 && g.nx > 0) ? 1 : -1;
@@ -1593,6 +1615,7 @@ function arrowPoints(a) {
     : [{k: 'p1', x: a.x1, y: a.y1}, {k: 'p2', x: a.x2, y: a.y2}];
 }
 function setArrowPoint(a, k, x, y) {
+  if (a.type === 'eq') { if (k === 'p1') { const b = eqBox(a), dx = x - b.x0, dy = y - b.y0; a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; } return; }
   if (k === 'p1') { a.x1 = x; a.y1 = y; } else if (k === 'p2') { a.x2 = x; a.y2 = y; }
   else if (k === 'c1') { a.c1x = x; a.c1y = y; } else if (k === 'c2') { a.c2x = x; a.c2y = y; }
   else if (k === 'h') { const g = bracketGeo(a, 2); a.h = Math.max(16, 2 * Math.abs((x - g.px) * g.nx + (y - g.py) * g.ny)); }
@@ -1641,6 +1664,73 @@ function editBracketIdx(a) {
   setTimeout(() => { inp.focus(); inp.select(); }, 0);
 }
 const isMark = a => a && (a.type === 'bracket' || a.type === 'rect' || a.type === 'ellipse');
+/* ---------- Reaktionsgleichungen (Text mit automatisch tief-/hochgestellten Zahlen und gezeichneten Pfeilen) ---------- */
+const EQ_ARROWS = {'→': {type: 'reaction'}, '⇌': {type: 'equilibrium'}, '↔': {type: 'resonance'}, '↷': {type: 'curved'}, '⇢': {type: 'reaction', dashed: true}};
+const EQ_SIZE = 20;
+function eqNormalize(t) { return t.replace(/<=>/g, '⇌').replace(/<->/g, '↔').replace(/-->/g, '→').replace(/->/g, '→'); }
+// Zerlegen: Koeffizienten normal, Zahlen hinter Symbolen tief, Zahl+Ladung hoch, „4;2-“ gestapelt
+function eqTokens(src) {
+  const s = eqNormalize(src), out = [];
+  let ctx = false;   // steht direkt davor ein Formelzeichen (Buchstabe, Klammer zu, tiefgestellte Zahl)?
+  const isEnd = c => c === undefined || /\s/.test(c) || c in EQ_ARROWS || c === ';' || c === '(' || c === ')' || c === ',';
+  const pushN = t => { const l = out[out.length - 1]; if (l && l.k === 'n') l.t += t; else out.push({k: 'n', t}); };
+  const sg = c => c === '+' ? '+' : '−';
+  for (let i = 0; i < s.length;) {
+    const c = s[i];
+    if (/\s/.test(c)) { if (out.length && out[out.length - 1].k !== 'sp') out.push({k: 'sp'}); ctx = false; i++; continue; }
+    if (c in EQ_ARROWS) { out.push({k: 'arrow', a: c}); ctx = false; i++; continue; }
+    if (/\d/.test(c)) {
+      let j = i; while (j < s.length && /\d/.test(s[j])) j++;
+      const num = s.slice(i, j), m = s.slice(j).match(/^;(\d*)([+\-−])/);
+      if (ctx && m) { out.push({k: 'stack', sub: num, sup: m[1] + sg(m[2])}); i = j + m[0].length; continue; }
+      if (ctx && '+-−'.includes(s[j] || 'x') && isEnd(s[j + 1])) { out.push({k: 'sup', t: num + sg(s[j])}); i = j + 1; continue; }
+      if (ctx) { out.push({k: 'sub', t: num}); i = j; continue; }
+      pushN(num); i = j; continue;   // Koeffizient
+    }
+    if ('+-−'.includes(c)) {
+      if (ctx && isEnd(s[i + 1])) { out.push({k: 'sup', t: sg(c)}); i++; continue; }
+      if (c === '+') { out.push({k: 'op', t: '+'}); ctx = false; i++; continue; }
+      pushN('−'); ctx = false; i++; continue;
+    }
+    pushN(c); ctx = /[A-Za-zÄÖÜäöüß)\]]/.test(c); i++;
+  }
+  while (out.length && out[out.length - 1].k === 'sp') out.pop();
+  return out;
+}
+let eqCv = null;
+const eqW = (t, px) => { eqCv = eqCv || document.createElement('canvas').getContext('2d'); eqCv.font = px + 'px ' + FF(); return eqCv.measureText(t).width; };
+// Lage aller Teile (relativ zum Anfang der Grundlinie)
+function eqLayout(text, size = EQ_SIZE) {
+  const it = [], sm = size * 0.66, aw = size * 2.3, gap = size * 0.55;
+  let x = 0, prevArrowOrOp = true;
+  const T = eqTokens(text);
+  for (let i = 0; i < T.length; i++) {
+    const t = T[i];
+    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow'))) x += size * 0.28; continue; }
+    if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw}); x += aw + gap; prevArrowOrOp = true; continue; }
+    if (t.k === 'op') { x += size * 0.38; it.push({k: 'n', t: '+', x, s: size, dy: 0}); x += eqW('+', size) + size * 0.38; prevArrowOrOp = true; continue; }
+    if (t.k === 'n') { it.push({k: 'n', t: t.t, x, s: size, dy: 0}); x += eqW(t.t, size); }
+    else if (t.k === 'sub') { it.push({k: 'n', t: t.t, x, s: sm, dy: size * 0.3}); x += eqW(t.t, sm); }
+    else if (t.k === 'sup') { it.push({k: 'n', t: t.t, x, s: sm, dy: -size * 0.45}); x += eqW(t.t, sm); }
+    else if (t.k === 'stack') { it.push({k: 'n', t: t.sub, x, s: sm, dy: size * 0.3}, {k: 'n', t: t.sup, x, s: sm, dy: -size * 0.45}); x += Math.max(eqW(t.sub, sm), eqW(t.sup, sm)); }
+    prevArrowOrOp = false;
+  }
+  return {it, w: Math.max(x, size)};
+}
+function eqBox(a) { const s = a.size || EQ_SIZE; return {x0: a.x1 - 2, y0: a.y1 - s * 1.05, x1: a.x2 + 2, y1: a.y1 + s * 0.55}; }
+function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328') {
+  const L = eqLayout(text, size), f = v => v.toFixed(1), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let o = '';
+  for (const q of L.it) {
+    if (q.k === 'n') { o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${col}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
+    const A = EQ_ARROWS[q.a], ay = y0 - size * 0.32, xa = x0 + q.x, xb = x0 + q.x + q.w;
+    const t = {type: A.type, x1: xa, y1: ay, x2: xb, y2: ay, width: Math.max(1.4, size / 12), dashed: !!A.dashed, color: col};
+    if (A.type === 'curved') { t.y1 = t.y2 = y0 + size * 0.05; t.c1x = xa + q.w * 0.25; t.c1y = y0 - size * 0.9; t.c2x = xa + q.w * 0.75; t.c2y = y0 - size * 0.9; }
+    o += arrowSVG(t);
+  }
+  return {svg: o, w: L.w};
+}
+function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328'); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
 function makeArrow(type, x1, y1, x2, y2) {
   const a = {id: nextId++, type, x1, y1, x2, y2, dashed: arrowDashed, head: arrowHead, width: arrowWidth};
   if (HS_DEF[type]) a.hs = arrowHS[type] || HS_DEF[type];
@@ -1697,6 +1787,7 @@ function arrowSVG(a) {
   const dx0 = a.x2 - a.x1, dy0 = a.y2 - a.y1, L = Math.hypot(dx0, dy0) || 1, dx = dx0 / L, dy = dy0 / L;
   const inset = 2 + 2 * sw;   // Strich endet innerhalb der gefüllten Spitze
   switch (a.type) {
+    case 'eq': return eqSVG(a);
     case 'bracket': {
       // eckige Klammern quer über die Verknüpfungsbindungen, Öffnungen zur Wiederholungseinheit; „n“ unten außen an der rechten Klammer
       const s = 7;
@@ -1748,6 +1839,7 @@ function markSegs(a) {
   return out;
 }
 function arrowDist(a, w) {
+  if (a.type === 'eq') { const b = eqBox(a); return Math.hypot(Math.max(b.x0 - w.x, 0, w.x - b.x1), Math.max(b.y0 - w.y, 0, w.y - b.y1)); }
   if (isMark(a)) return Math.min(...markSegs(a).map(q => segDist(w.x, w.y, q[0], q[1], q[2], q[3])));
   if (a.type !== 'curved') return segDist(w.x, w.y, a.x1, a.y1, a.x2, a.y2);
   let d = Infinity, prev = bez(a, 0);
@@ -1763,7 +1855,7 @@ function arrowHit(w) {
 const selArrows = () => [...sel].filter(k => k.startsWith('ar:')).map(k => arrowById(parseKey(k).id)).filter(Boolean);
 function arrowHandleHit(w) {
   const r = 8 / Math.min(1, view.s);
-  for (const a of selArrows()) for (const p of arrowPoints(a)) if (Math.hypot(p.x - w.x, p.y - w.y) < r) return {id: a.id, k: p.k};
+  for (const a of selArrows()) if (a.type !== 'eq') for (const p of arrowPoints(a)) if (Math.hypot(p.x - w.x, p.y - w.y) < r) return {id: a.id, k: p.k};
   return null;
 }
 // Griffe nur bei ausgewählten Pfeilen; beim Elektronenverschiebepfeil mit Hilfslinien
@@ -1775,6 +1867,7 @@ function arrowOverlay() {
     o += `<g opacity="0.55">${arrowSVG(t)}</g>`;
   }
   for (const a of selArrows()) {
+    if (a.type === 'eq') { const b = eqBox(a); o += `<rect x="${b.x0 - 3}" y="${b.y0 - 3}" width="${b.x1 - b.x0 + 6}" height="${b.y1 - b.y0 + 6}" rx="4" fill="#2563eb10" stroke="#2563eb" stroke-width="${k}" stroke-dasharray="${4 * k} ${3 * k}"/>`; continue; }
     if (a.type === 'curved') o += `<path d="M${a.x1},${a.y1} L${a.c1x},${a.c1y} L${a.c2x},${a.c2y} L${a.x2},${a.y2}" fill="none" stroke="#2563eb" stroke-width="${k}" stroke-dasharray="${3 * k} ${3 * k}" opacity="0.7"/>`;
     else if (isMark(a)) o += markSegs(a).map(q => `<line x1="${q[0]}" y1="${q[1]}" x2="${q[2]}" y2="${q[3]}" stroke="#2563eb30" stroke-width="10" stroke-linecap="round"/>`).join('');
     else o += `<line x1="${a.x1}" y1="${a.y1}" x2="${a.x2}" y2="${a.y2}" stroke="#2563eb30" stroke-width="12" stroke-linecap="round"/>`;
@@ -1794,6 +1887,9 @@ function arrowPointerDown(e, w) {
   if (hnd) { capt(e); arrowDrag = {kind: 'handle', id: hnd.id, k: hnd.k, moved: false}; return true; }
   if (tool === 'arrow') { capt(e); const q = snapPt(w.x, w.y); arrowDrag = {kind: 'create', x0: q.x, y0: q.y, cur: null}; return true; }
   const ah = arrowHit(w);
+  const dbl = ah && ah.type === 'eq' && arrowPointerDown.last && arrowPointerDown.last.id === ah.id && performance.now() - arrowPointerDown.last.t < 450;
+  if (ah && ah.type === 'eq') arrowPointerDown.last = {id: ah.id, t: performance.now()};
+  if (dbl && tool !== 'erase') { sel.clear(); sel.add('ar:' + ah.id); renderOverlay(); updateSelBar(); eqOpen(ah); return true; }
   if (ah) {
     // Molekül hat Vorrang vor Pfeilen (Atome, Gruppen, Elektronenpaare)
     const molHit = isProj(display.mode) ? projHit(w) : hitTest(w);
@@ -2223,7 +2319,7 @@ function rotInfo() {
   }
   if (isProj(display.mode)) return null;
   const ids = selectedAtomIds();
-  const arr = selArrows();
+  const arr = selArrows().filter(a => a.type !== 'eq');   // Reaktionsgleichungen bleiben waagrecht
   if (ids.length < 2 && !arr.length) return null;
   const pts = [...ids.map(id => atomById(id)).filter(Boolean), ...arr.flatMap(arrowPoints)];
   if (pts.length < 2) return null;
@@ -4947,6 +5043,8 @@ function updateSelBar() {
   if (nH) parts.push(nH === 1 ? '1 H-Teil' : nH + ' H-Teile');
   if (nB) parts.push(nB === 1 ? '1 Bindung' : nB + ' Bindungen');
   if (nL) parts.push(nL === 1 ? '1 e⁻-Paar' : nL + ' e⁻-Paare');
+  const nE = selArrows().filter(a => a.type === 'eq').length; nP -= nE;
+  if (nE) parts.push(nE === 1 ? '1 Gleichung' : nE + ' Gleichungen');
   if (nP) parts.push(nP === 1 ? '1 Pfeil' : nP + ' Pfeile');
   if (nC) parts.push(nC === 1 ? '1 Ladung' : nC + ' Ladungen');
   if (nR) parts.push(nR === 1 ? '1 Radikal-Elektron' : nR + ' Radikal-Elektronen');
@@ -4969,6 +5067,7 @@ function updateSelBar() {
   const showBS = !!selB && selB.order === 1 && !isProj(display.mode) && display.mode !== 'struct';
   selBondSt.classList.toggle('hide', !showBS);
   document.getElementById('selInsCH2').classList.toggle('hide', !canInsCH2(selB));
+  { const ea = selArrows(); document.getElementById('selEqEdit').classList.toggle('hide', !(ea.length === 1 && ea[0].type === 'eq' && sel.size === 1)); }
   if (showBS) selBondSt.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.bs === (selB.stereo || 'none')));
   // Rest umschalten: Strukturformel ⇄ Gruppenformel
   const dInfo = aKeysForDisp();
@@ -5201,6 +5300,61 @@ function duplicateSelection() {
   toast(n ? (n === 1 ? 'Molekül dupliziert' : n + ' Moleküle dupliziert') + ' – die Kopie ist ausgewählt und kann verschoben werden' : 'Pfeil(e) dupliziert');
 }
 document.getElementById('selDup').onclick = () => duplicateSelection();
+// Reaktionsgleichung: Eingabefeld mit Pfeilknöpfen und Vorschau
+let eqEditing = null;
+{
+  const inp = document.getElementById('eqInput'), prev = document.getElementById('eqPrev'), panel = document.getElementById('eqPanel');
+  const icons = {'→': '#arrowBtns [data-arrow=reaction] svg', '⇌': '#arrowBtns [data-arrow=equilibrium] svg', '↔': '#arrowBtns [data-arrow=resonance] svg', '↷': '#arrowBtns [data-arrow=curved] svg'};
+  const names = {'→': 'Reaktionspfeil', '⇌': 'Gleichgewichtspfeil', '↔': 'Mesomeriepfeil', '↷': 'Elektronenverschiebepfeil (gebogen)', '⇢': 'Reaktionspfeil gestrichelt'};
+  const box = document.getElementById('eqArrows');
+  for (const ch of Object.keys(EQ_ARROWS)) {
+    const b = document.createElement('button'); b.type = 'button'; b.title = names[ch] + ' einfügen';
+    const ic = icons[ch] && document.querySelector(icons[ch]);
+    b.innerHTML = ic ? ic.outerHTML : '<svg viewBox="0 0 28 24"><line x1="3" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3.5 2.5"/><polygon points="25,12 18,8.5 19.5,12 18,15.5" fill="currentColor"/></svg>';
+    b.onmousedown = e => e.preventDefault();
+    b.onclick = () => { const a = inp.selectionStart ?? inp.value.length, z = inp.selectionEnd ?? a; inp.setRangeText(' ' + ch + ' ', a, z, 'end'); inp.value = inp.value.replace(/ {2,}/g, ' '); inp.focus(); upd(); };
+    box.appendChild(b);
+  }
+  const upd = () => {
+    const pos = inp.selectionStart, v = eqNormalize(inp.value);
+    if (v !== inp.value) { const d = inp.value.length - v.length; inp.value = v; inp.setSelectionRange(Math.max(0, pos - d), Math.max(0, pos - d)); }
+    const r = eqMarkup(inp.value, 6, 30, 20);
+    prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="44" viewBox="0 0 ${Math.ceil(r.w + 14)} 44">${r.svg}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
+  };
+  inp.addEventListener('input', upd);
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eqOk').click(); } if (e.key === 'Escape') eqClose(); });
+  window.eqOpen = a => {
+    eqEditing = a || null;
+    panel.classList.remove('hide'); document.getElementById('eqOpen').classList.add('on');
+    inp.value = a ? a.text : (inp.value || '');
+    document.getElementById('eqOk').textContent = a ? 'Übernehmen' : 'Einfügen';
+    upd(); inp.focus(); inp.select();
+    panel.scrollIntoView({block: 'nearest'});
+  };
+  window.eqClose = () => { panel.classList.add('hide'); document.getElementById('eqOpen').classList.remove('on'); eqEditing = null; };
+  document.getElementById('eqOpen').onclick = () => panel.classList.contains('hide') ? eqOpen(null) : eqClose();
+  document.getElementById('eqCancel').onclick = () => eqClose();
+  document.getElementById('eqOk').onclick = () => {
+    const t = eqNormalize(inp.value).trim();
+    if (!t) { eqClose(); return; }
+    pushUndo();
+    let a = eqEditing && arrows.includes(eqEditing) ? eqEditing : null;
+    if (a) a.text = t;
+    else {
+      const bb = bbox(0), r = svg.getBoundingClientRect();
+      const eqs = arrows.filter(q => q.type === 'eq');
+      const x = eqs.length ? Math.min(...eqs.map(q => q.x1)) : bb ? bb.x : view.x + r.width / view.s * 0.15, y = bb ? bb.y + bb.h + 60 : view.y + r.height / view.s * 0.4;
+      a = {id: nextId++, type: 'eq', text: t, x1: x, y1: y, x2: x, y2: y, size: EQ_SIZE};
+      eqSVG(a); arrows.push(a);
+    }
+    sel.clear(); parkSel.clear(); sel.add('ar:' + a.id);
+    inp.value = ''; eqClose();
+    changed(); updateSelBar();
+    const bb2 = bbox(40), rr = svg.getBoundingClientRect(), w = rr.width / view.s, h = rr.height / view.s;
+    if (bb2 && (bb2.x < view.x || bb2.y < view.y || bb2.x + bb2.w > view.x + w || bb2.y + bb2.h > view.y + h)) fitView();
+  };
+  document.getElementById('selEqEdit').onclick = () => { const a = selArrows()[0]; if (a && a.type === 'eq') eqOpen(a); };
+}
 // CH₂-Einheit in eine Einfachbindung zwischen zwei Gerüstatomen (C–C, C–N, C–O …) einschieben
 function canInsCH2(b) {
   if (!b || b.order !== 1 || isProj(display.mode)) return false;
