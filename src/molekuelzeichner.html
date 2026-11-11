@@ -44,7 +44,17 @@
   .eqHead{display:flex;align-items:center;justify-content:space-between;font-size:13px}
   .eqHead .x{border:none;background:none;color:var(--mut,var(--muted));font-size:15px;cursor:pointer}
   #eqInput{width:100%;box-sizing:border-box;font-size:18px;padding:9px 11px;border-radius:8px}
+  .eqRow{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   .eqArrows{display:flex;gap:6px;flex-wrap:wrap}
+  .eqStates{display:flex;gap:4px}.eqStates button{padding:4px 9px;min-height:34px;font-size:13px}
+  .eqColors{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px}
+  .eqColors .lbl{color:var(--mut,var(--muted));margin-right:2px}
+  .eqChip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:7px;font-size:13px;min-height:28px}
+  .eqChip i{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff6}
+  .eqChip.on{outline:2px solid var(--acc,#2563eb)}
+  .eqPal{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+  .eqPal button{width:20px;height:20px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff3}
+  .eqPal .std{width:auto;border-radius:6px;padding:2px 8px;font-size:12px}
   .eqArrows button{padding:4px 10px;min-height:34px;display:flex;align-items:center;justify-content:center}
   .eqArrows svg{width:34px;height:22px}
   .eqPrev{background:#fff;border-radius:8px;min-height:62px;padding:6px 10px;overflow-x:auto;display:flex;align-items:center}
@@ -386,10 +396,12 @@
     <div id="eqPanel" class="hide">
       <div class="eqHead"><b>Reaktionsgleichung</b><button id="eqX" class="x" title="Schließen (Esc)">✕</button></div>
       <input id="eqInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. 2 H2 + O2 -> 2 H2O">
-      <div class="eqArrows" id="eqArrows" title="Pfeil an der Schreibmarke einfügen"></div>
+      <div class="eqRow"><div class="eqArrows" id="eqArrows" title="Pfeil an der Schreibmarke einfügen"></div>
+        <div class="eqStates" id="eqStates" title="Aggregatzustand hinter der Formel an der Schreibmarke ergänzen"><button type="button" data-st="(aq)">(aq)</button><button type="button" data-st="(s)">(s)</button><button type="button" data-st="(l)">(l)</button><button type="button" data-st="(g)">(g)</button></div></div>
+      <div class="eqColors" id="eqColors"></div>
       <div id="eqPrev" class="eqPrev"></div>
       <div class="eqFoot">
-        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>=</b> oder <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔. Pfeil ändern: Pfeil in der Vorschau anklicken (oder Schreibmarke daneben setzen) und oben einen anderen Pfeil wählen.</div>
+        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>=</b> oder <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔. (aq), (s), (l), (g) erscheinen etwas kleiner und tiefer. Pfeil ändern: Pfeil in der Vorschau anklicken (oder Schreibmarke daneben setzen) und oben einen anderen Pfeil wählen.</div>
         <div class="eqBtns"><button id="eqCancel">Abbrechen</button><button id="eqOk" class="primary">Einfügen</button></div>
       </div>
     </div>
@@ -1688,6 +1700,8 @@ function eqTokens(src) {
     const c = s[i];
     if (/\s/.test(c)) { if (out.length && out[out.length - 1].k !== 'sp') out.push({k: 'sp'}); ctx = false; i++; continue; }
     if (c in EQ_ARROWS) { out.push({k: 'arrow', a: c, src: i}); ctx = false; i++; continue; }
+    // Aggregatzustand (aq), (s), (l), (g) hinter einer Formel: klein und tiefgestellt
+    { const ms = s.slice(i).match(/^\((aq\.?|s|l|g)\)/i); if (ms) { out.push({k: 'state', t: '(' + ms[1].toLowerCase() + ')'}); ctx = false; i += ms[0].length; continue; } }
     if (/\d/.test(c)) {
       let j = i; while (j < s.length && /\d/.test(s[j])) j++;
       const num = s.slice(i, j), m = s.slice(j).match(/^;(\d*)([+\-−])/);
@@ -1713,35 +1727,45 @@ const eqW = (t, px) => { eqCv = eqCv || document.createElement('canvas').getCont
 // Lage aller Teile (relativ zum Anfang der Grundlinie)
 function eqLayout(text, size = EQ_SIZE) {
   const it = [], sm = size * 0.66, aw = size * 2.3, gap = size * 0.7;
-  let x = 0, prevArrowOrOp = true;
+  let x = 0, prevArrowOrOp = true, lastEl = null;
   const T = eqTokens(text);
   for (let i = 0; i < T.length; i++) {
     const t = T[i];
-    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'coef'))) x += size * 0.28; continue; }
+    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'coef')) && !(T[i + 1] && T[i + 1].k === 'state')) x += size * 0.28; continue; }
+    // Aggregatzustand: zwischen Normalschrift und Index – etwas kleiner und etwas tiefer
+    if (t.k === 'state') { const ss = size * 0.8; x += size * 0.06; it.push({k: 'n', t: t.t, x, s: ss, dy: size * 0.16, st: true}); x += eqW(t.t, ss); lastEl = null; prevArrowOrOp = false; continue; }
     if (t.k === 'coef') {
       // kleiner Abstand zwischen stöchiometrischer Zahl und Formel (deutlich kleiner als vor „+“ bzw. Pfeil)
-      it.push({k: 'n', t: t.t, x, s: size, dy: 0, arrowAt: undefined}); x += eqW(t.t, size);
+      it.push({k: 'n', t: t.t, x, s: size, dy: 0}); x += eqW(t.t, size); lastEl = null;
       let j = i + 1; while (T[j] && T[j].k === 'sp') j++;
       if (T[j] && T[j].k !== 'op' && T[j].k !== 'arrow') x += size * 0.16;
       continue;
     }
     if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw, src: t.src}); x += aw + gap; prevArrowOrOp = true; continue; }
     if (t.k === 'op') { x += size * 0.5; it.push({k: 'n', t: '+', x, s: size, dy: 0}); x += eqW('+', size) + size * 0.5; prevArrowOrOp = true; continue; }
-    if (t.k === 'n') { it.push({k: 'n', t: t.t, x, s: size, dy: 0}); x += eqW(t.t, size); }
-    else if (t.k === 'sub') { it.push({k: 'n', t: t.t, x, s: sm, dy: size * 0.3}); x += eqW(t.t, sm); }
-    else if (t.k === 'sup') { it.push({k: 'n', t: t.t, x, s: sm, dy: -size * 0.45}); x += eqW(t.t, sm); }
-    else if (t.k === 'stack') { it.push({k: 'n', t: t.sub, x, s: sm, dy: size * 0.3}, {k: 'n', t: t.sup, x, s: sm, dy: -size * 0.45}); x += Math.max(eqW(t.sub, sm), eqW(t.sup, sm)); }
+    if (t.k === 'n') {
+      // Formeltext in Elementsymbole zerlegen (für Farben je Atomsorte)
+      for (const part of t.t.match(/[A-Z][a-z]?|[^A-Z]+/g) || []) {
+        const el = /^[A-Z][a-z]?$/.test(part) ? part : null;
+        it.push({k: 'n', t: part, x, s: size, dy: 0, el}); x += eqW(part, size);
+        lastEl = el || (/[)\]]$/.test(part) ? null : lastEl);
+        if (!el) lastEl = null;
+      }
+    }
+    else if (t.k === 'sub') { it.push({k: 'n', t: t.t, x, s: sm, dy: size * 0.3, el: lastEl}); x += eqW(t.t, sm); }
+    else if (t.k === 'sup') { it.push({k: 'n', t: t.t, x, s: sm, dy: -size * 0.45, ch: true}); x += eqW(t.t, sm); }
+    else if (t.k === 'stack') { it.push({k: 'n', t: t.sub, x, s: sm, dy: size * 0.3, el: lastEl}, {k: 'n', t: t.sup, x, s: sm, dy: -size * 0.45, ch: true}); x += Math.max(eqW(t.sub, sm), eqW(t.sup, sm)); }
     prevArrowOrOp = false;
   }
   return {it, w: Math.max(x, size)};
 }
 function eqBox(a) { const s = a.size || EQ_SIZE; return {x0: a.x1 - 2, y0: a.y1 - s * 1.05, x1: a.x2 + 2, y1: a.y1 + s * 0.55}; }
-function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328') {
+function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328', colors = null) {
   const L = eqLayout(text, size), f = v => v.toFixed(1), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   let o = ''; const arrs = [];
   for (const q of L.it) {
     if (q.k === 'arrow') arrs.push({x: x0 + q.x, w: q.w, src: q.src});
-    if (q.k === 'n') { o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${col}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
+    if (q.k === 'n') { const c = (colors && ((q.el && colors[q.el]) || (q.ch && colors['±']))) || col; o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${c}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
     const A = EQ_ARROWS[q.a], ay = y0 - size * 0.32, xa = x0 + q.x, xb = x0 + q.x + q.w;
     const t = {type: A.type, x1: xa, y1: ay, x2: xb, y2: ay, width: Math.max(1.4, size / 12), dashed: !!A.dashed, color: col};
     if (A.type === 'curved') { t.y1 = t.y2 = y0 + size * 0.05; t.c1x = xa + q.w * 0.25; t.c1y = y0 - size * 0.9; t.c2x = xa + q.w * 0.75; t.c2y = y0 - size * 0.9; }
@@ -1749,7 +1773,7 @@ function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328') {
   }
   return {svg: o, w: L.w, arrows: arrs};
 }
-function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328'); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
+function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328', a.colors); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
 function makeArrow(type, x1, y1, x2, y2) {
   const a = {id: nextId++, type, x1, y1, x2, y2, dashed: arrowDashed, head: arrowHead, width: arrowWidth};
   if (HS_DEF[type]) a.hs = arrowHS[type] || HS_DEF[type];
@@ -5347,17 +5371,50 @@ let eqEditing = null;
   const upd = () => {
     const pos = inp.selectionStart, v = eqNormalize(inp.value);
     if (v !== inp.value) { const d = inp.value.length - v.length; inp.value = v; inp.setSelectionRange(Math.max(0, pos - d), Math.max(0, pos - d)); }
-    const r = eqMarkup(inp.value, 6, 40, 26), selA = inp.selectionEnd - inp.selectionStart === 1 ? inp.selectionStart : -1;
+    const r = eqMarkup(inp.value, 6, 40, 26, '#1f2328', eqColors), selA = inp.selectionEnd - inp.selectionStart === 1 ? inp.selectionStart : -1;
     // Pfeile in der Vorschau anklickbar: markiert den Pfeil im Eingabefeld, ein Pfeilknopf ersetzt ihn dann
     const hits = r.arrows.map(q => `<rect class="eqHit${q.src === selA ? ' on' : ''}" data-src="${q.src}" x="${q.x - 4}" y="10" width="${q.w + 8}" height="40" rx="6"><title>Pfeil anklicken und oben einen anderen Pfeil wählen</title></rect>`).join('');
+    drawColors();
     prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="58" viewBox="0 0 ${Math.ceil(r.w + 14)} 58">${r.svg}${hits}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
   };
   inp.addEventListener('input', upd);
   inp.addEventListener('select', upd); inp.addEventListener('keyup', upd); inp.addEventListener('click', upd);
   prev.addEventListener('click', e => { const h = e.target.closest('.eqHit'); if (!h) return; const k = +h.dataset.src; inp.focus(); inp.setSelectionRange(k, k + 1); upd(); });
   inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eqOk').click(); } if (e.key === 'Escape') eqClose(); });
+  // Farben je Atomsorte bzw. für Ladungen (±)
+  let eqColors = {}, eqPick = null;
+  const colBox = document.getElementById('eqColors');
+  const drawColors = () => {
+    const els = [...new Set(eqLayout(inp.value).it.filter(q => q.el).map(q => q.el))];
+    const hasCh = eqLayout(inp.value).it.some(q => q.ch);
+    const keys = [...els, ...(hasCh ? ['±'] : [])];
+    if (eqPick && !keys.includes(eqPick)) eqPick = null;
+    if (!keys.length) { colBox.innerHTML = ''; return; }
+    let h = '<span class="lbl">Farbe:</span>' + keys.map(k => `<button type="button" class="eqChip${eqPick === k ? ' on' : ''}" data-k="${k}" title="${k === '±' ? 'Ladungen' : 'Atomsorte ' + k} einfärben"><i style="background:${eqColors[k] || '#1f2328'}"></i>${k === '±' ? 'Ladungen' : k}</button>`).join('');
+    if (eqPick) h += '<span class="eqPal">' + SWATCHES.map(c => `<button type="button" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('') + '<button type="button" class="std" data-c="">Standard</button></span>';
+    colBox.innerHTML = h;
+  };
+  colBox.addEventListener('mousedown', e => e.preventDefault());
+  colBox.addEventListener('click', e => {
+    const ch = e.target.closest('.eqChip'), cb = e.target.closest('.eqPal button');
+    if (ch) { eqPick = eqPick === ch.dataset.k ? null : ch.dataset.k; drawColors(); return; }
+    if (cb && eqPick) { if (cb.dataset.c && cb.dataset.c !== '#1f2328') eqColors[eqPick] = cb.dataset.c; else delete eqColors[eqPick]; drawColors(); upd(); }
+  });
+  // Aggregatzustand: hinter die Formel an der Schreibmarke setzen (bzw. vorhandenen ersetzen)
+  document.getElementById('eqStates').addEventListener('mousedown', e => e.preventDefault());
+  document.getElementById('eqStates').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const v = inp.value; let a = inp.selectionStart ?? v.length;
+    // Ende der Formel suchen (bis Leerzeichen, +, Pfeil)
+    let z = a; while (z < v.length && !/\s/.test(v[z]) && !(v[z] in EQ_ARROWS)) z++;
+    const m = v.slice(0, z).match(/\((aq\.?|s|l|g)\)$/i);
+    const from = m ? z - m[0].length : z;
+    inp.setRangeText(b.dataset.st, from, z, 'end');
+    inp.focus(); upd();
+  });
   window.eqOpen = a => {
     eqEditing = a || null;
+    eqColors = a && a.colors ? {...a.colors} : {}; eqPick = null;
     panel.classList.remove('hide'); document.getElementById('eqOpen').classList.add('on');
     inp.value = a ? a.text : (inp.value || '');
     document.getElementById('eqOk').textContent = a ? 'Übernehmen' : 'Einfügen';
@@ -5373,12 +5430,13 @@ let eqEditing = null;
     if (!t) { eqClose(); return; }
     pushUndo();
     let a = eqEditing && arrows.includes(eqEditing) ? eqEditing : null;
-    if (a) a.text = t;
+    const cols = Object.keys(eqColors).length ? {...eqColors} : undefined;
+    if (a) { a.text = t; if (cols) a.colors = cols; else delete a.colors; }
     else {
       const bb = bbox(0), r = svg.getBoundingClientRect();
       const eqs = arrows.filter(q => q.type === 'eq');
       const x = eqs.length ? Math.min(...eqs.map(q => q.x1)) : bb ? bb.x : view.x + r.width / view.s * 0.15, y = bb ? bb.y + bb.h + 60 : view.y + r.height / view.s * 0.4;
-      a = {id: nextId++, type: 'eq', text: t, x1: x, y1: y, x2: x, y2: y, size: EQ_SIZE};
+      a = {id: nextId++, type: 'eq', text: t, x1: x, y1: y, x2: x, y2: y, size: EQ_SIZE}; if (cols) a.colors = cols;
       eqSVG(a); arrows.push(a);
     }
     sel.clear(); parkSel.clear(); sel.add('ar:' + a.id);
