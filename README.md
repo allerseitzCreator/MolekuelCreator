@@ -24,6 +24,7 @@ Ein Molekül-Zeichenprogramm für den Chemieunterricht, das komplett im Browser 
 
 **Namen und Formeln**
 - Struktur aus dem Namen (IUPAC- und Trivialnamen) oder aus SMILES erzeugen
+- „Internetsuche“ (außerhalb von Claude, z. B. über GitHub Pages): unbekannte Namen über PubChem, Wikidata und OPSIN nachschlagen
 - Summenformel und IUPAC-Name des gezeichneten Moleküls
 - SMILES mit Stereoinformation kopieren
 

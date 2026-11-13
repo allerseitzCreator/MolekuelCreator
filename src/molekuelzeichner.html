@@ -39,6 +39,8 @@
   .primary{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important;font-weight:500}
   .primary:disabled{opacity:.6}
   .namemsg{font-size:13px;color:var(--muted)}
+  #webSearch.hide{display:none}
+  #webSearch.pulse{outline:2px solid #fbbf24;outline-offset:1px}
   #eqPanel{position:absolute;top:64px;left:0;right:0;margin:0 auto;width:min(760px,calc(100% - 32px));z-index:6;display:flex;flex-direction:column;gap:10px;background:var(--bar,#fff);color:var(--tx,var(--ink));border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 10px 32px #0006;box-sizing:border-box}
   #eqPanel.hide{display:none}
   .eqHead{display:flex;align-items:center;justify-content:space-between;font-size:13px}
@@ -294,6 +296,7 @@
       <label for="nameInput">Name → Struktur</label>
       <input id="nameInput" placeholder="IUPAC- oder Trivialname (deutsch/englisch) oder SMILES – z. B. 2-Methylpropan-1-ol" spellcheck="false">
       <button type="submit" class="primary">Struktur erzeugen</button>
+      <button type="button" id="webSearch" class="hide" title="Name im Internet nachschlagen (PubChem, Wikidata, OPSIN) und die gefundene Struktur einfügen">🌐 Internetsuche</button>
       <span id="nameMsg" class="namemsg"></span>
       <button type="button" id="askClaude" class="ask hide">Claude fragen</button>
     </form>
@@ -6484,9 +6487,56 @@ document.getElementById('nameForm').addEventListener('submit', e => {
     insertGraph(res);
     showMsg((res.how === 'smiles' ? 'SMILES gelesen' : 'Erkannt') + ': ' + formulaText() + ' · hinzugefügt (Rückgängig entfernt es wieder)', 'ok');
   } catch (err) {
-    showMsg(err.message || 'Name nicht erkannt.', 'err');
+    showMsg((err.message || 'Name nicht erkannt.') + (inClaude ? '' : ' → „🌐 Internetsuche“ probieren'), 'err');
+    if (!inClaude) webBtn.classList.add('pulse');
     if (samplePromise) samplePromise.then(s => { if (s) askBtn.classList.remove('hide'); });
   }
+});
+/* ---------- Internetsuche (nur außerhalb von Claude, z. B. über GitHub Pages): Name → SMILES ---------- */
+const inClaude = (() => { try { return !!(window.claude && typeof window.claude.use === 'function'); } catch (e) { return false; } })();
+const webBtn = document.getElementById('webSearch');
+if (!inClaude) webBtn.classList.remove('hide');
+async function getJSON(url, ms = 9000) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, {signal: ctl.signal}); if (!r.ok) return null; return await r.json(); } catch (e) { return null; } finally { clearTimeout(t); }
+}
+async function webLookup(name) {
+  const q = encodeURIComponent(name);
+  // 1) PubChem (englische Namen, viele Synonyme)
+  const pc = await getJSON(`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${q}/property/IsomericSMILES,Title/JSON`);
+  const pp = pc?.PropertyTable?.Properties?.[0];
+  const pSmi = pp && (pp.SMILES || pp.IsomericSMILES || pp.CanonicalSMILES);
+  if (pSmi) return {smiles: pSmi, src: 'PubChem', title: pp.Title || name, url: `https://pubchem.ncbi.nlm.nih.gov/compound/${pp.CID}`};
+  // 2) Wikidata (deutsche Namen und Trivialnamen)
+  for (const lang of ['de', 'en']) {
+    const se = await getJSON(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${q}&language=${lang}&uselang=de&type=item&limit=6&format=json&origin=*`);
+    const ids = (se?.search || []).map(x => x.id);
+    if (!ids.length) continue;
+    const en = await getJSON(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ids.join('|')}&props=claims|labels&languages=de|en&format=json&origin=*`);
+    for (const id of ids) {
+      const c = en?.entities?.[id]?.claims || {};
+      const val = p => c[p]?.[0]?.mainsnak?.datavalue?.value;
+      const smi = val('P2017') || val('P233') || val('P10718');
+      if (smi) { const L = en.entities[id].labels || {}; return {smiles: smi, src: 'Wikidata', title: (L.de || L.en || {}).value || name, url: `https://www.wikidata.org/wiki/${id}`}; }
+    }
+  }
+  // 3) OPSIN (systematische englische IUPAC-Namen)
+  const op = await getJSON(`https://opsin.ch.cam.ac.uk/opsin/${q}.json`);
+  if (op?.smiles) return {smiles: op.smiles, src: 'OPSIN', title: name, url: 'https://opsin.ch.cam.ac.uk/'};
+  return null;
+}
+webBtn.addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  if (!name) { showMsg('Bitte zuerst einen Namen eingeben.', 'err'); return; }
+  webBtn.disabled = true; webBtn.classList.remove('pulse'); showMsg('Suche im Internet …');
+  try {
+    const hit = await webLookup(name);
+    if (!hit) { showMsg('Im Internet nichts gefunden (PubChem, Wikidata, OPSIN) – Schreibweise prüfen oder englischen Namen versuchen.', 'err'); return; }
+    let res;
+    try { res = Chem.fromInput(hit.smiles); } catch (e) { showMsg(`Gefunden (${hit.src}), aber die Struktur konnte nicht gelesen werden: ${hit.smiles}`, 'err'); return; }
+    insertGraph(res);
+    showMsg(`Gefunden über ${hit.src}: ${hit.title} · ${formulaText()} · hinzugefügt (Rückgängig entfernt es wieder)`, 'ok');
+  } finally { webBtn.disabled = false; }
 });
 askBtn.addEventListener('click', async () => {
   const name = nameInput.value.trim(); if (!name) return;
