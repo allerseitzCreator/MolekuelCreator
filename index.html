@@ -494,6 +494,7 @@
     <div class="sect">
       <h2>Bedienung</h2>
       <div class="keys">
+        <b style="color:var(--ink);font-weight:500">Zeichnen:</b> mit „Zeichnen“ über die Fläche ziehen – sobald der Zeiger über eine Bindungslänge hinausgeht, entsteht ein weiteres C-Atom (mit seinen H-Atomen), solange man zieht, wächst die Kette weiter (Valenzstrichformel: gerade, Skelettformel: Zickzack). Standard auf leerer Fläche ist die Valenzstrichformel.<br>
         <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
         <b style="color:var(--ink);font-weight:500">Stereozentren:</b> unter „Darstellung“ wählen: keine Kennzeichnung, R/S (bzw. * solange die Konfiguration offen ist) oder ✱ Stern an jedem asymmetrischen C-Atom. Beispiele und Namen erscheinen zunächst als Valenzstrichformel ohne Kennzeichnung. Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
@@ -2614,7 +2615,7 @@ let arrowType = 'reaction', arrowDashed = false, arrowHead = 2, arrowWidth = 2, 
 // gewählte Pfeilspitze je Pfeilart (Standard: Reaktion/Mesomerie gefüllt, Gleichgewicht halb, Elektronenverschiebung Dreieck)
 const HS_DEF = {reaction: 'full', resonance: 'full', equilibrium: 'halfU', curved: 'tri'}, arrowHS = {};
 let tool = 'draw', element = 'C', bondOrder = 1, bondStereo = null, ring = null;
-let display = {mode: 'skeletal', lp: true, lpStyle: 'bar', rs: true, star: false, showC: false, grid: 'off', arom: false, cnum: false};
+let display = {mode: 'struct', lp: true, lpStyle: 'bar', rs: true, star: false, showC: false, grid: 'off', arom: false, cnum: false};
 try { display.arom = localStorage.getItem('molzeichner-arom') === '1'; display.cnum = localStorage.getItem('molzeichner-cnum') === '1'; } catch (e) {}
 let hPos = [];            // Positionen der explizit gezeichneten H-Atome (Strukturformel)
 let chPos = [], rdPos = [];
@@ -7013,9 +7014,36 @@ svg.addEventListener('pointermove', e => {
   }
   if (tool === 'draw' && drag.hit?.type === 'h') return;
   if (tool === 'draw') {
-    const fromAtom = drag.hit?.type === 'atom' ? atomById(drag.hit.id) : null;
-    const from = fromAtom || (nearestAtom(drag.w0.x, drag.w0.y, 8) ?? drag.w0);
-    const ep = endPoint(w, from, fromAtom?.id, e.shiftKey);
+    let fromAtom = drag.hit?.type === 'atom' ? atomById(drag.hit.id) : null;
+    let from = fromAtom || (nearestAtom(drag.w0.x, drag.w0.y, 8) ?? drag.w0);
+    // Über die Standardlänge hinaus gezogen: Atom (mit seinen H-Atomen) setzen und von dort aus weiterzeichnen
+    // Skelettformeln: Zickzack (120° zur vorigen Bindung); Valenzstrich/Halbstruktur: gerade wie gezogen
+    const zig = (f, fa) => {
+      if (coordsOf(display.mode) !== 'skel' || e.shiftKey) return endPoint(w, f, fa?.id, e.shiftKey);
+      const hitA = nearestAtom(w.x, w.y, 14 / view.s, fa?.id); if (hitA) return {x: hitA.x, y: hitA.y, atom: hitA};
+      // Grundrichtung: vom Kettenanfang zum Zeiger (gerundet auf 30°), damit der Zickzack gleichmäßig bleibt
+      const c0 = drag.c0 || f, base = Math.round(Math.atan2(w.y - c0.y, w.x - c0.x) / (Math.PI / 6)) * (Math.PI / 6);
+      const prev = fa ? neighbors(fa.id).map(n => Math.atan2(n.y - fa.y, n.x - fa.x)) : [];
+      const cand = [base + Math.PI / 6, base - Math.PI / 6].map(t => ({t, sc: prev.length ? Math.min(...prev.map(q => Math.abs(angDiff(t, q) - 2 * Math.PI / 3))) : (t < base ? 0 : 1)}));
+      const t = cand.sort((x, y) => x.sc - y.sc)[0].t;
+      const p0 = {x: f.x + BL * Math.cos(t), y: f.y + BL * Math.sin(t)}, nr = nearestAtom(p0.x, p0.y, 8, fa?.id);
+      return nr ? {x: nr.x, y: nr.y, atom: nr} : p0;
+    };
+    if (!ring && drag.hit?.type !== 'bond' && Math.hypot(w.x - from.x, w.y - from.y) > BL * 1.2) {
+      const ep0 = zig(from, fromAtom);
+      if (!drag.chainUndo) { pushUndo(); drag.chainUndo = true; }
+      if (!fromAtom) { const q0 = snapPt(drag.w0.x, drag.w0.y); fromAtom = nearestAtom(drag.w0.x, drag.w0.y, 8) || addAtom(q0.x, q0.y, element); }
+      const n = ep0.atom || addAtom(ep0.x, ep0.y, drag.chained ? 'C' : element);
+      const ex = bondBetween(fromAtom.id, n.id);
+      if (!ex) { const nb = addBond(fromAtom.id, n.id, drag.chained ? 1 : bondOrder); if (bondStereo && !drag.chained) { nb.stereo = bondStereo; nb.stereoFrom = fromAtom.id; } }
+      if (!drag.c0) drag.c0 = {x: fromAtom.x, y: fromAtom.y};
+      drag.chained = true; drag.hit = {type: 'atom', id: n.id}; drag.w0 = {x: n.x, y: n.y};
+      fromAtom = n; from = n;
+      changed();
+    }
+    // nach einem gesetzten Atom: erst ab einer halben Bindungslänge eine weitere Bindung andeuten
+    if (drag.chained && Math.hypot(w.x - from.x, w.y - from.y) < BL * 0.5) { drag.ep = null; renderOverlay(); return; }
+    const ep = drag.chained ? zig(from, fromAtom) : endPoint(w, from, fromAtom?.id, e.shiftKey);
     drag.ep = ep;
     const k = 1 / view.s;
     renderOverlay(`<line x1="${from.x}" y1="${from.y}" x2="${ep.x}" y2="${ep.y}" stroke="#0f766e" stroke-width="2.5" stroke-dasharray="${5 * k} ${4 * k}" stroke-linecap="round"/>` +
@@ -7127,14 +7155,16 @@ svg.addEventListener('pointerup', e => {
   }
   if (tool === 'draw') {
     if (d.moved && d.ep && !(hit && hit.type === 'bond')) {
-      pushUndo();
+      if (!d.chainUndo) pushUndo();
       const q0 = snapPt(d.w0.x, d.w0.y);
       const start = hit?.type === 'atom' ? atomById(hit.id) : (nearestAtom(d.w0.x, d.w0.y, 8) || addAtom(q0.x, q0.y, element));
       const end = d.ep.atom || addAtom(d.ep.x, d.ep.y, element);
       const ex = bondBetween(start.id, end.id);
-      if (bondStereo) { const nb = ex || addBond(start.id, end.id, 1); nb.order = 1; nb.stereo = bondStereo; nb.stereoFrom = start.id; }
+      if (d.chained) { if (!ex) addBond(start.id, end.id, 1); }
+      else if (bondStereo) { const nb = ex || addBond(start.id, end.id, 1); nb.order = 1; nb.stereo = bondStereo; nb.stereoFrom = start.id; }
       else if (ex) ex.order = ex.order % 3 + 1; else addBond(start.id, end.id, bondOrder);
       changed();
+    } else if (d.chained) { changed();
     } else if (!d.moved) {
       if (!hit) { pushUndo(); const q = snapPt(w.x, w.y); addAtom(q.x, q.y, element); changed(); }
       else if (hit.type === 'atom') {
@@ -8220,7 +8250,7 @@ if (false) document.querySelectorAll('#arHead button').forEach(b => b.onclick = 
 /* ---------- Kopf ---------- */
 document.getElementById('bUndo').onclick = undo;
 document.getElementById('bRedo').onclick = redo;
-document.getElementById('bClear').onclick = () => { if (!atoms.length && !arrows.length && !parked.length) return; pushUndo(); atoms = []; bonds = []; arrows = []; parked = []; parkSel.clear(); sel.clear(); changed(); toast('Zeichenfläche geleert – mit Rückgängig wiederherstellbar'); };
+document.getElementById('bClear').onclick = () => { if (!atoms.length && !arrows.length && !parked.length) return; pushUndo(); atoms = []; bonds = []; arrows = []; parked = []; parkSel.clear(); sel.clear(); display.mode = 'struct'; syncDisplayUI(); changed(); toast('Zeichenfläche geleert – mit Rückgängig wiederherstellbar'); };
 document.getElementById('zIn').onclick = () => zoomAt(1.25);
 document.getElementById('zOut').onclick = () => zoomAt(0.8);
 document.getElementById('zFit').onclick = fitView;
@@ -8520,6 +8550,8 @@ window.__mz = {parked: () => parked.map(p => ({view: p.view, n: p.atoms.length, 
 
 /* ---------- Start ---------- */
 try { const s = localStorage.getItem('molzeichner-v1'); if (s) restore(s); } catch (e) {}
+// leere Zeichenfläche: Standard ist die Valenzstrichformel
+if (!atoms.length && !parked.length && !isProj(display.mode)) { display.mode = 'struct'; syncDisplayUI(); }
 plausState = new Map(atoms.map(a => [a.id, {bs: usedValence(a), el: a.el}]));
 new ResizeObserver(() => updateViewBox()).observe(svg);
 fitView(); render(); updateInfo();
