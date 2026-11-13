@@ -149,6 +149,14 @@
   .modal.open{display:flex}
   .modal .box{background:#fff;border-radius:12px;padding:18px;max-width:min(720px,100%);max-height:100%;overflow:auto;box-shadow:0 10px 40px #0003}
   .modal h3{margin:0 0 10px;font-size:15px}
+  .modal.wide .box{max-width:min(980px,100%)}
+  .pse{display:grid;grid-template-columns:repeat(18,minmax(38px,1fr));gap:3px}
+  .pse .pe{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 0;min-height:42px;border-radius:5px;border:1px solid #0002;cursor:pointer;font:inherit;color:#1f2328;line-height:1.05}
+  .pse .pe b{font-size:15px;font-weight:600}.pse .pe small{font-size:9px;opacity:.65}
+  .pse .pe.s{background:#fde2e2}.pse .pe.d{background:#e3ecfb}.pse .pe.p{background:#e3f4e6}.pse .pe.f{background:#f6ead8}
+  .pse .pe:hover{outline:2px solid #2563eb;z-index:1}.pse .pe.on{outline:3px solid #2563eb}
+  .pse .pseGap{height:8px}.pse .pseMark{font-size:10px;display:flex;align-items:center;justify-content:center;color:#6b6f76;border:1px dashed #0002;border-radius:5px}
+  #elBtns .pseBtn{grid-column:1/-1;font-size:13px}
   .modal img{max-width:100%;border:1px solid var(--line);border-radius:6px;display:block}
   .modal textarea{width:100%;height:200px;font-family:"IBM Plex Mono",monospace;font-size:12px}
   .modal .row{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
@@ -561,11 +569,12 @@
 'use strict';
 const BL = 46;               // Bindungslänge (mittel)
 const SVGNS = 'http://www.w3.org/2000/svg';
-const ELEMENTS = ['C','H','N','O','S','P','F','Cl','Br','I','B','Si'];
-const MASS = {H:1.008,B:10.81,C:12.011,N:14.007,O:15.999,F:18.998,Si:28.085,P:30.974,S:32.06,Cl:35.45,Br:79.904,I:126.904};
+const ELEMENTS = ['C','H','O','N','S','P','Cl','Br'];   // Schnellauswahl; alle übrigen über das PSE
+const PSE = [['H','Wasserstoff',1.008,1,1],['He','Helium',4.0026,1,18],['Li','Lithium',6.94,2,1],['Be','Beryllium',9.0122,2,2],['B','Bor',10.81,2,13],['C','Kohlenstoff',12.011,2,14],['N','Stickstoff',14.007,2,15],['O','Sauerstoff',15.999,2,16],['F','Fluor',18.998,2,17],['Ne','Neon',20.180,2,18],['Na','Natrium',22.990,3,1],['Mg','Magnesium',24.305,3,2],['Al','Aluminium',26.982,3,13],['Si','Silicium',28.085,3,14],['P','Phosphor',30.974,3,15],['S','Schwefel',32.06,3,16],['Cl','Chlor',35.45,3,17],['Ar','Argon',39.948,3,18],['K','Kalium',39.098,4,1],['Ca','Calcium',40.078,4,2],['Sc','Scandium',44.956,4,3],['Ti','Titan',47.867,4,4],['V','Vanadium',50.942,4,5],['Cr','Chrom',51.996,4,6],['Mn','Mangan',54.938,4,7],['Fe','Eisen',55.845,4,8],['Co','Cobalt',58.933,4,9],['Ni','Nickel',58.693,4,10],['Cu','Kupfer',63.546,4,11],['Zn','Zink',65.38,4,12],['Ga','Gallium',69.723,4,13],['Ge','Germanium',72.630,4,14],['As','Arsen',74.922,4,15],['Se','Selen',78.971,4,16],['Br','Brom',79.904,4,17],['Kr','Krypton',83.798,4,18],['Rb','Rubidium',85.468,5,1],['Sr','Strontium',87.62,5,2],['Y','Yttrium',88.906,5,3],['Zr','Zirconium',91.224,5,4],['Nb','Niob',92.906,5,5],['Mo','Molybdän',95.95,5,6],['Tc','Technetium',98,5,7],['Ru','Ruthenium',101.07,5,8],['Rh','Rhodium',102.91,5,9],['Pd','Palladium',106.42,5,10],['Ag','Silber',107.87,5,11],['Cd','Cadmium',112.41,5,12],['In','Indium',114.82,5,13],['Sn','Zinn',118.71,5,14],['Sb','Antimon',121.76,5,15],['Te','Tellur',127.60,5,16],['I','Iod',126.90,5,17],['Xe','Xenon',131.29,5,18],['Cs','Caesium',132.91,6,1],['Ba','Barium',137.33,6,2],['La','Lanthan',138.91,9,3],['Ce','Cer',140.12,9,4],['Pr','Praseodym',140.91,9,5],['Nd','Neodym',144.24,9,6],['Pm','Promethium',145,9,7],['Sm','Samarium',150.36,9,8],['Eu','Europium',151.96,9,9],['Gd','Gadolinium',157.25,9,10],['Tb','Terbium',158.93,9,11],['Dy','Dysprosium',162.50,9,12],['Ho','Holmium',164.93,9,13],['Er','Erbium',167.26,9,14],['Tm','Thulium',168.93,9,15],['Yb','Ytterbium',173.05,9,16],['Lu','Lutetium',174.97,9,17],['Hf','Hafnium',178.49,6,4],['Ta','Tantal',180.95,6,5],['W','Wolfram',183.84,6,6],['Re','Rhenium',186.21,6,7],['Os','Osmium',190.23,6,8],['Ir','Iridium',192.22,6,9],['Pt','Platin',195.08,6,10],['Au','Gold',196.97,6,11],['Hg','Quecksilber',200.59,6,12],['Tl','Thallium',204.38,6,13],['Pb','Blei',207.2,6,14],['Bi','Bismut',208.98,6,15],['Po','Polonium',209,6,16],['At','Astat',210,6,17],['Rn','Radon',222,6,18],['Fr','Francium',223,7,1],['Ra','Radium',226,7,2],['Ac','Actinium',227,10,3],['Th','Thorium',232.04,10,4],['Pa','Protactinium',231.04,10,5],['U','Uran',238.03,10,6],['Np','Neptunium',237,10,7],['Pu','Plutonium',244,10,8],['Am','Americium',243,10,9],['Cm','Curium',247,10,10],['Bk','Berkelium',247,10,11],['Cf','Californium',251,10,12],['Es','Einsteinium',252,10,13],['Fm','Fermium',257,10,14],['Md','Mendelevium',258,10,15],['No','Nobelium',259,10,16],['Lr','Lawrencium',266,10,17],['Rf','Rutherfordium',267,7,4],['Db','Dubnium',268,7,5],['Sg','Seaborgium',269,7,6],['Bh','Bohrium',270,7,7],['Hs','Hassium',277,7,8],['Mt','Meitnerium',278,7,9],['Ds','Darmstadtium',281,7,10],['Rg','Roentgenium',282,7,11],['Cn','Copernicium',285,7,12],['Nh','Nihonium',286,7,13],['Fl','Flerovium',289,7,14],['Mc','Moscovium',290,7,15],['Lv','Livermorium',293,7,16],['Ts','Tenness',294,7,17],['Og','Oganesson',294,7,18]];   // Symbol, Name, Atommasse, Zeile (9/10: Lanthanoide/Actinoide), Gruppe
+const MASS = Object.fromEntries(PSE.map(e => [e[0], e[2]]));
 // Standardfarbe aller Atome (und damit ihrer freien Elektronenpaare): schwarz – Farben nur, wenn man sie selbst vergibt
 const COLOR = new Proxy({}, {get: () => '#1f2328'});
-const VAL = {H:[1],B:[3],C:[4],Si:[4],N:[3],P:[3,5],O:[2],S:[2,4,6],F:[1],Cl:[1,3,5,7],Br:[1,3,5,7],I:[1,3,5,7]};
+const VAL = {H:[1],B:[3],C:[4],Si:[4],Ge:[4],N:[3],P:[3,5],As:[3,5],O:[2],S:[2,4,6],Se:[2,4,6],Te:[2,4,6],F:[1],Cl:[1,3,5,7],Br:[1,3,5,7],I:[1,3,5,7]};
 
 let atoms = [], bonds = [], nextId = 1;
 let arrows = [];
@@ -5136,6 +5145,7 @@ function setElement(el) {
   if (tool === 'select' && selHasAtoms()) { applyElement(el); return; }
   element = el; if (tool !== 'draw' || ring) setTool('draw');
   document.querySelectorAll('#elBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.el === el));
+  { const pb = document.getElementById('pseBtn'); if (pb) { const other = !ELEMENTS.includes(el); pb.classList.toggle('on', other); pb.textContent = other ? 'PSE · ' + el : 'PSE'; } }
 }
 // angeklickte Bindung durch die gewählte Bindungsart ersetzen (Einfach-, Doppel-, Dreifachbindung)
 function applyBondOrder(b) {
@@ -5160,9 +5170,28 @@ const elBox = document.getElementById('elBtns');
 ELEMENTS.forEach(el => {
   const b = document.createElement('button');
   b.className = 'tbtn el' + (el === 'C' ? ' on' : ''); b.dataset.el = el; b.textContent = el;
-  b.style.color = COLOR[el]; b.onclick = () => setElement(el);
+  b.title = PSE.find(e => e[0] === el)[1]; b.onclick = () => setElement(el);
   elBox.appendChild(b);
 });
+// Periodensystem: alle Elemente auswählbar
+{
+  const b = document.createElement('button');
+  b.className = 'tbtn el pseBtn'; b.id = 'pseBtn'; b.title = 'Periodensystem – beliebiges Element wählen'; b.textContent = 'PSE';
+  b.onclick = () => openPSE();
+  elBox.appendChild(b);
+}
+function openPSE() {
+  const cur = element;
+  let h = '<div class="pse">';
+  for (const [sym, name, m, r, g] of PSE) {
+    const fb = r >= 9, row = fb ? r : r, cls = fb ? ' f' : (g <= 2 && sym !== 'H' ? ' s' : g >= 3 && g <= 12 ? ' d' : ' p');
+    h += `<button type="button" class="pe${cls}${sym === cur ? ' on' : ''}" data-el="${sym}" style="grid-row:${r};grid-column:${g}" title="${name} (${m})"><b>${sym}</b><small>${PSE.findIndex(e => e[0] === sym) + 1}</small></button>`;
+  }
+  h += '<div class="pseGap" style="grid-row:8;grid-column:1/19"></div><div class="pseMark" style="grid-row:6;grid-column:3">La–Lu</div><div class="pseMark" style="grid-row:7;grid-column:3">Ac–Lr</div></div><p class="muted" style="margin:10px 0 0;font-size:12px">Element anklicken – danach setzt ein Klick auf die Zeichenfläche dieses Element bzw. ersetzt ein angeklicktes Atom.</p>';
+  openModal('Periodensystem der Elemente', h);
+  document.getElementById('mBody').querySelector('.pse').onclick = e => { const q = e.target.closest('.pe'); if (!q) return; setElement(q.dataset.el); modal.classList.remove('open'); };
+  modal.classList.add('wide');
+}
 
 const RINGS = [{n: 3, arom: false}, {n: 4, arom: false}, {n: 5, arom: false}, {n: 6, arom: false}, {n: 6, arom: true}, {n: 7, arom: false}];
 const ringBox = document.getElementById('ringBtns');
@@ -5839,7 +5868,7 @@ function applyElement(el) {
   changed();
 }
 const selEl = document.getElementById('selEl');
-selEl.innerHTML = '<option value="">–</option>' + ELEMENTS.map(e => `<option value="${e}">${e}</option>`).join('');
+selEl.innerHTML = '<option value="">–</option>' + ELEMENTS.map(e => `<option value="${e}">${e}</option>`).join('') + '<optgroup label="Periodensystem">' + PSE.filter(e => !ELEMENTS.includes(e[0])).map(e => `<option value="${e[0]}">${e[0]} – ${e[1]}</option>`).join('') + '</optgroup>';
 selEl.onchange = () => { if (selEl.value) applyElement(selEl.value); };
 const selColor = document.getElementById('selColor');
 selColor.addEventListener('input', e => applyColor(e.target.value, true));
@@ -6141,7 +6170,7 @@ document.getElementById('zFit').onclick = fitView;
 
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 const modal = document.getElementById('modal');
-function openModal(title, html) { document.getElementById('mTitle').textContent = title; document.getElementById('mBody').innerHTML = html; modal.classList.add('open'); }
+function openModal(title, html) { document.getElementById('mTitle').textContent = title; document.getElementById('mBody').innerHTML = html; modal.classList.remove('wide'); modal.classList.add('open'); }
 document.getElementById('mClose').onclick = () => modal.classList.remove('open');
 modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 
