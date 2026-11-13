@@ -307,6 +307,7 @@
       <h2>Darstellung</h2>
       <div class="grid g2" id="modeBtns">
         <button class="tbtn" data-mode="skeletal" title="Skelettformel: C- und H-Atome am Kohlenstoff werden nicht ausgeschrieben">Skelett</button>
+        <button class="tbtn" data-mode="wedge" title="Keil-Strich-Formel: Skelettformel mit räumlicher Darstellung der Stereozentren (Keil = nach vorn, Strich = nach hinten)">Keil-Strich</button>
         <button class="tbtn" data-mode="cond" title="Halbstrukturformel: jedes Atom mit seinen H-Atomen als Gruppe (CH₃–CH₂–OH), Bindungsstriche zwischen den Gruppen">Halbstruktur</button>
         <button class="tbtn" data-mode="struct" title="Valenzstrichformel: alle Elementsymbole, alle H-Atome einzeln mit Bindungsstrich">Valenzstrichformel</button>
         <button class="tbtn" data-mode="fischer" title="Fischer-Projektion (für Moleküle mit asymmetrischem C-Atom)">Fischer</button>
@@ -515,7 +516,7 @@
         <b style="color:var(--ink);font-weight:500">Plausibilität:</b> Neue Bindungen werden geprüft. Kann das Atom mit Ladung mehr Bindungen eingehen, wird sie ergänzt (N mit 4 Bindungen → N⁺, O mit 3 → O⁺, S mit 3 → S⁺, P mit 4 → P⁺, B mit 4 → B⁻) und beim Entfernen der Bindung wieder zurückgenommen. Unmögliche Bindungen (z. B. zwei an einem H, fünf an einem C) lösen eine Warnung aus und werden rot gestrichelt markiert.<br>
         <b style="color:var(--ink);font-weight:500">Ladung &amp; Radikale:</b> Ladungszeichen lassen sich mit „Auswählen“ anklicken und einfärben (Löschen entfernt die Ladung) und mit „Auswählen“ oder „Verschieben“ um das Atom ziehen – sie rasten in 45°-Schritten ein (<kbd>Umschalt</kbd> = frei). „• Radikal“ (Werkzeug oder Auswahlleiste) setzt je Klick ein ungepaartes Elektron als Punkt ans Atom – die H-Zahl passt sich an (CH₄ → CH₃•). Einzelne Punkte sind anklickbar zum Färben oder Löschen. Rückgängig machen: mit dem Radikal-Werkzeug den Punkt anklicken (oder <kbd>Umschalt</kbd>-Klick aufs Atom), in der Auswahlleiste „– Radikal“, mit dem Radierer oder „Rückgängig“ – die H-Atome kehren zurück (CH₃• → CH₄).<br>
         <b style="color:var(--ink);font-weight:500">Pfeile:</b> Pfeiltyp wählen und auf der Fläche ziehen. Ausgewählte Pfeile zeigen Griffe (Elektronenverschiebepfeil: 2 Enden + 2 Biegepunkte). „gestrichelt“ und die Spitze (1 oder 2 Striche) gelten für neue bzw. ausgewählte Pfeile.<br>
-        <b style="color:var(--ink);font-weight:500">Keil-Strich:</b> unter „Bindung“ Keil ▲ oder Strich ┅ wählen und vom Stereozentrum aus zeichnen bzw. eine Bindung anklicken (erneut klicken kehrt sie um); R/S folgt der Zeichnung. In der Valenzstrichformel liegen die beiden Kettenbindungen in der Ebene, die beiden anderen Bindungen zeigen gemeinsam nach vorn (Keile) oder gemeinsam nach hinten (Striche) – wie eine um 90° gedrehte Fischer-Projektion (dort: senkrecht nach hinten, waagrecht nach vorn). Fischer, Struktur- und Skelettformel zeigen immer dieselbe räumliche Anordnung.<br>
+        <b style="color:var(--ink);font-weight:500">Keil-Strich:</b> unter „Bindung“ Keil ▲ oder Strich ┅ wählen und vom Stereozentrum aus zeichnen bzw. eine Bindung anklicken (erneut klicken kehrt sie um); R/S folgt der Zeichnung. Keile und Striche zeigt die Darstellung „Keil-Strich“ (die Skelettformel bleibt ohne; beim Wählen von Keil/Strich wird automatisch umgeschaltet). In der Valenzstrichformel liegen die beiden Kettenbindungen in der Ebene, die beiden anderen Bindungen zeigen gemeinsam nach vorn (Keile) oder gemeinsam nach hinten (Striche) – wie eine um 90° gedrehte Fischer-Projektion (dort: senkrecht nach hinten, waagrecht nach vorn). Fischer-Projektion, Valenzstrich- und Keil-Strich-Formel zeigen immer dieselbe räumliche Anordnung.<br>
         <b style="color:var(--ink);font-weight:500">Valenzstrichformel:</b> eigene, rechtwinklige Anordnung (sp³-C im Kreuz); Skelett- und Valenzstrichformel merken sich ihre Atompositionen getrennt.<br>
         <b style="color:var(--ink);font-weight:500">Raster:</b> □ quadratisch oder ⬡ Chemie-Raster (30°/60°/120°). Atome und Pfeile rasten beim Zeichnen und Verschieben ein; „Ausrichten“ setzt ausgewählte (sonst alle) Atome aufs Raster. Waagrechte und senkrechte Bindungen bzw. Pfeile rasten immer exakt ein (Arretierung, ±12°).<br>
         <b style="color:var(--ink);font-weight:500">Reste:</b> Atom eines Rests oder den ganzen Rest (z. B. Ethyl, Propyl per Rahmen/Umschalt-Klick) auswählen → in der Leiste Halbstrukturformel, Summenformel (C₂H₅) oder „Als Strukturformel“. Bei Resten mit mehreren C-Atomen zeigt die Halbstrukturformel jede Gruppe einzeln mit Bindungsstrichen dazwischen (CH₂–CH₂–CH₃); die Striche sind echte Bindungen und lassen sich anklicken und bearbeiten. Ein Klick auf eine dieser Gruppen bietet wieder „Als Strukturformel“ bzw. die Summenformel an. Ein Klick auf irgendein C-Atom einer Alkylgruppe (z. B. Propyl) bietet die ganze Gruppe an – „CH₂–CH₂–CH₃“ oder „C₃H₇“ – und zusätzlich „nur CH₃“ für die kleinste Gruppe am angeklickten Atom.<br>
@@ -2941,7 +2942,7 @@ const normA = x => ((x % TAU) + TAU) % TAU;
 
 // freie Elektronenpaare sichtbar? Fischer-Projektion: standardmäßig ohne, einzeln einblendbar (a.lpF)
 // Skelett- und Halbstrukturformel: freie Elektronenpaare eigens einstellbar (beim Wählen der Darstellung zunächst aus)
-const LP_OWN = ['skeletal', 'cond'];
+const LP_OWN = ['skeletal', 'wedge', 'cond'];
 function lpAll() { return LP_OWN.includes(display.mode) ? !!(display.lpBy && display.lpBy[display.mode]) : display.lp; }
 function lpOn(a) { return display.mode === 'fischer' ? !!a.lpF : (a.lp ?? lpAll()); }
 function lonePairCount(a, h) {
@@ -3247,9 +3248,9 @@ function molMarkup() {
   const delocC = new Set(aromR.filter(r => r.kind === 'ion').map(r => r.q));
   for (const id of delocC) { const li = info.get(id), a = atomById(id); if (li && !struct && !a.color) li.show = false; }
   const labels = new Map(atoms.map(a => [a.id, info.get(a.id).show && !HID.has(a.id) ? info.get(a.id) : null]));
-  // Keil/Strich wird nur in der Skelettformel gezeichnet; die räumliche Information bleibt für Projektionen erhalten
+  // Keil/Strich wird nur in der Keil-Strich-Formel gezeichnet (Skelettformel ohne); die räumliche Information bleibt für Projektionen erhalten
   lastWedges = computeWedges(info);
-  const wedges = display.mode === 'skeletal' ? lastWedges : new Map();
+  const wedges = display.mode === 'wedge' ? lastWedges : new Map();
   if (struct) for (const a of atoms) if (a.sMarks) for (const [k, t] of Object.entries(a.sMarks)) {
     // nur noch gültige Bindungen (Atom kann inzwischen andere Nachbarn haben)
     if (k[0] === 'h' ? !(info.get(a.id)?.hAng.length > +k.split(':')[1]) : !bondsOf(a.id).some(b => String(b.id) === k)) continue;
@@ -5446,7 +5447,7 @@ function focusParked(p) {
   sel.clear(); parkSel.clear(); hover = null;
   syncDisplayUI(); render(); updateInfo(); save();
 }
-const VIEW_DE = {skeletal: 'Skelettformel', cond: 'Halbstrukturformel', struct: 'Valenzstrichformel', fischer: 'Fischer-Projektion', haworth: 'Haworth-Projektion'};
+const VIEW_DE = {skeletal: 'Skelettformel', wedge: 'Keil-Strich-Formel', cond: 'Halbstrukturformel', struct: 'Valenzstrichformel', fischer: 'Fischer-Projektion', haworth: 'Haworth-Projektion'};
 // geparkte Moleküle zeichnen (jedes in seiner Darstellung)
 function parkedMarkup() {
   parkInfo = [];
@@ -5773,7 +5774,7 @@ function smiles() {
   // cis/trans: Richtungszeichen / bzw. \ an Einfachbindungen neben C=C (aus der Lage in der Skelettformel)
   const dirOf = new Map();
   {
-    const P = a => (display.mode !== 'skeletal' && a.skx !== undefined) ? {x: a.skx, y: a.sky} : a;
+    const P = a => (coordsOf(display.mode) !== 'skel' && a.skx !== undefined) ? {x: a.skx, y: a.sky} : a;
     const ringIds = ringInfo().set;
     for (const b of bonds) {
       if (b.order !== 2 || !tree.has(b.id) || (ringIds.has(b.a) && ringIds.has(b.b))) continue;
@@ -6115,7 +6116,7 @@ function fragName(f) {
   const centers = new Set(stereoInfo().centers.map(c => c.id));
   const cip = new Map(); f.atoms.forEach((a, i) => { if (centers.has(a.id) && a.cip) { cip.set(i, a.cip); g.atoms[i].cip = a.cip; } });
   // E/Z aus der Skelettformel-Lage (die Strukturformel ist rechtwinklig umgeordnet)
-  const pos = f.atoms.map(a => display.mode !== 'skeletal' && a.skx !== undefined ? {x: a.skx, y: a.sky} : {x: a.x, y: a.y});
+  const pos = f.atoms.map(a => coordsOf(display.mode) !== 'skel' && a.skx !== undefined ? {x: a.skx, y: a.sky} : {x: a.x, y: a.y});
   const key = f.atoms.map(a => a.el + a.charge + (cip.get(idx.get(a.id)) || '')).join(',') + '|' + f.bonds.map(b => idx.get(b.a) + '-' + idx.get(b.b) + ':' + b.order).join(',') +
     '|' + f.bonds.filter(b => b.order === 2).map(b => { const A = atomById(b.a), B = atomById(b.b); return [A, B].map(q => neighbors(q.id).map(n => Math.sign(Math.round((B.x - A.x) * (n.y - A.y) - (B.y - A.y) * (n.x - A.x)))).join('')).join('/'); }).join(';');
   if (nameCache.has(key)) return {...nameCache.get(key), key, g, f};
@@ -6719,7 +6720,7 @@ function projClick(h, e) {
     default: {
       if (h && h.type === 'bond') {
         const b = bondById(h.id); if (!b) return;
-        if (bondStereo) { toast('Keil/Strich gibt es nur in der Skelett- und Valenzstrichformel.'); return; }
+        if (bondStereo) { toast('Keil/Strich gibt es nur in der Keil-Strich- und der Valenzstrichformel.'); return; }
         if (applyBondOrder(b)) changed();
         return;
       }
@@ -7192,6 +7193,8 @@ function setOrder(o) {
 function setStereoTool(t) {
   bondOrder = 1; bondStereo = t; if (tool !== 'draw' || ring) setTool('draw');
   document.querySelectorAll('#bondBtns .tbtn').forEach(b => b.classList.toggle('on', b.dataset.stereo === t));
+  // die Skelettformel zeigt keine Keile/Striche – zum Zeichnen in die Keil-Strich-Formel wechseln
+  if (display.mode === 'skeletal') { sel.clear(); parkSel.clear(); setDisplay({mode: 'wedge'}); toast('Keil/Strich: Darstellung „Keil-Strich-Formel“ gewählt'); }
 }
 document.querySelectorAll('#toolBtns .tbtn[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
 document.querySelectorAll('#bondBtns .tbtn').forEach(b => b.onclick = () => b.dataset.stereo ? setStereoTool(b.dataset.stereo) : setOrder(+b.dataset.order));
