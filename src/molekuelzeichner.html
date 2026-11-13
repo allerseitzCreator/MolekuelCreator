@@ -963,6 +963,27 @@ function crossH(bondAng, h) {
   if (used.length) { const opp = (used[0] + 2) % 4; free.sort((x, y) => (x === opp ? -1 : 0) - (y === opp ? -1 : 0) || (x === 3 ? -1 : 0) - (y === 3 ? -1 : 0)); }
   return free.length >= h ? free.slice(0, h).map(i => card[i]) : null;
 }
+function tetraH(a, deg, h, bondAng) {
+  if ((a.el !== 'C' && a.el !== 'Si') || a.charge || a.rad || h < 1 || deg + h !== 4) return null;
+  const bs = bondsOf(a.id); if (bs.some(b => b.order !== 1) || bs.some(b => inRingBond(b))) return null;
+  const d = Math.PI / 180, norm = t => Math.atan2(Math.sin(t), Math.cos(t));
+  // Seite mit mehr Platz (weniger Nachbaratome in der Nähe)
+  const crowd = t => { let c = 0; for (const o of atoms) { if (o.id === a.id) continue; const dx = o.x - a.x, dy = o.y - a.y, r = Math.hypot(dx, dy); if (r > 0 && r < 90) c += Math.max(0, Math.cos(Math.atan2(dy, dx) - t)) * (90 - r); } return c; };
+  if (deg === 0) return {ang: [-150 * d, -30 * d, 122 * d, 58 * d], w: [null, null, 'wedge', 'hash']};
+  if (deg === 1) {
+    const th = bondAng[0], sg = crowd(th + 120 * d) <= crowd(th - 120 * d) ? 1 : -1;
+    // Rest und ein H in der Ebene (Zickzack), Keil und Strich zusammen auf der anderen Seite
+    return {ang: [th + sg * 120 * d, th - sg * 98 * d, th - sg * 146 * d], w: [null, 'wedge', 'hash']};
+  }
+  // Mitte der größten Lücke zwischen den Bindungen
+  const s = bondAng.map(norm).sort((x, y) => x - y);
+  let best = 0, mid = 0;
+  for (let i = 0; i < s.length; i++) { const x = s[i], y = i + 1 < s.length ? s[i + 1] : s[0] + 2 * Math.PI, g = y - x; if (g > best) { best = g; mid = x + g / 2; } }
+  if (deg === 2) { const sp = Math.min(31 * d, best / 3.2); return {ang: [mid - sp, mid + sp], w: ['wedge', 'hash']}; }
+  // Stereozentrum: H bleibt implizit, die Keile an den Nachbarn zeigen die Konfiguration
+  if (deg === 3) return isStereoCenter(a.id) ? null : {ang: [mid], w: ['wedge']};
+  return null;
+}
 function isolatedH(k, left) {
   const d = Math.PI / 180;
   return ({1: [left ? Math.PI : 0], 2: [150 * d, 30 * d], 3: [90 * d, 210 * d, 330 * d], 4: [0, 90 * d, 180 * d, 270 * d]})[k]
@@ -982,6 +1003,8 @@ function atomInfo(a, deg) {
   // Gruppe eines Rests in Halbstrukturformel (CH₂–CH₂–CH₃): H stehen auch in der Strukturformel im Symbol
   const cond = !struct || unitShown(a);
   const hAng = !cond && h > 0 ? (deg === 0 ? isolatedH(h, left) : (crossH(bondAng, h) || spread(bondAng, h))) : [];
+  // Keil-Strich-Formel: sp³-C (nicht im Ring) mit seinen H-Atomen räumlich – zwei Bindungen in der Ebene, Keil nach vorn, Strich nach hinten
+  if (display.mode === 'wedge' && !unitShown(a)) { const t = tetraH(a, deg, h, bondAng); if (t) return {show: true, h, left, bondAng, hAng: t.ang, hW: t.w, hLen: t.ang.map(() => 40), cond: false}; }
   return {show, h, left, bondAng, hAng, cond};
 }
 
@@ -1220,7 +1243,8 @@ function molMarkup() {
   const labels = new Map(atoms.map(a => [a.id, info.get(a.id).show && !HID.has(a.id) ? info.get(a.id) : null]));
   // Keil/Strich wird nur in der Keil-Strich-Formel gezeichnet (Skelettformel ohne); die räumliche Information bleibt für Projektionen erhalten
   lastWedges = computeWedges(info);
-  const wedges = display.mode === 'wedge' ? lastWedges : new Map();
+  const wedges = display.mode === 'wedge' ? new Map(lastWedges) : new Map();
+  if (display.mode === 'wedge') for (const a of atoms) { const li = info.get(a.id); if (li && li.hW) li.hW.forEach((t, k) => { if (t && !wedges.has('h' + a.id + ':' + k)) wedges.set('h' + a.id + ':' + k, {from: a.id, type: t}); }); }
   if (struct) for (const a of atoms) if (a.sMarks) for (const [k, t] of Object.entries(a.sMarks)) {
     // nur noch gültige Bindungen (Atom kann inzwischen andere Nachbarn haben)
     if (k[0] === 'h' ? !(info.get(a.id)?.hAng.length > +k.split(':')[1]) : !bondsOf(a.id).some(b => String(b.id) === k)) continue;
