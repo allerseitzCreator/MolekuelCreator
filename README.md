@@ -45,6 +45,8 @@ Ein Molekül-Zeichenprogramm für den Chemieunterricht, das komplett im Browser 
 **Reaktionsgleichungen**
 - Eingabe mit Summenformeln; Zahlen werden automatisch tief- bzw. hochgestellt (H2O, Fe3+, SO4;2-)
 - Reaktions-, Gleichgewichts-, Mesomerie- und gebogener Pfeil sowie gestrichelter Pfeil
+- Koeffizienten automatisch ergänzen (Atom- und Ladungsbilanz, auch Redoxgleichungen)
+- markierte Teile einfärben; als bearbeitbaren Text (z. B. für Word) kopieren
 
 **Export**
 - PNG und SVG mit frei wählbarem Dateinamen

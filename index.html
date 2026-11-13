@@ -47,13 +47,14 @@
   .eqRow{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   .eqArrows{display:flex;gap:6px;flex-wrap:wrap}
   .eqStates{display:flex;gap:4px}.eqStates button{padding:4px 9px;min-height:34px;font-size:13px}
-  .eqColors{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12.5px}
-  .eqColors .lbl{color:var(--mut,var(--muted));margin-right:2px}
-  .eqChip{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:7px;font-size:13px;min-height:28px}
-  .eqChip i{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff6}
-  .eqChip.on{outline:2px solid var(--acc,#2563eb)}
-  .eqPal{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-  .eqPal button{width:20px;height:20px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff3}
+  .eqPal{display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+  .eqPal .lbl{color:var(--mut,var(--muted));margin-right:4px}
+  .eqPal button{width:22px;height:22px;border-radius:50%;padding:0;min-height:0;border:2px solid #fff3;cursor:pointer}
+  .eqPal .cust{width:22px;height:22px;border-radius:50%;overflow:hidden;display:inline-block;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);border:2px solid #fff3;cursor:pointer}
+  .eqPal .cust input{opacity:0;width:100%;height:100%;cursor:pointer}
+  .eqBalRow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+  .eqBalRow #eqCopy{margin-left:auto}
+  .eqStat{color:var(--mut,var(--muted))}.eqStat.ok{color:#4ade80}.eqStat.warn{color:#fbbf24}
   .eqPal .std{width:auto;border-radius:6px;padding:2px 8px;font-size:12px}
   .eqArrows button{padding:4px 10px;min-height:34px;display:flex;align-items:center;justify-content:center}
   .eqArrows svg{width:34px;height:22px}
@@ -398,10 +399,11 @@
       <input id="eqInput" type="text" autocomplete="off" spellcheck="false" placeholder="z. B. 2 H2 + O2 -> 2 H2O">
       <div class="eqRow"><div class="eqArrows" id="eqArrows" title="Pfeil an der Schreibmarke einfügen"></div>
         <div class="eqStates" id="eqStates" title="Aggregatzustand hinter der Formel an der Schreibmarke ergänzen"><button type="button" data-st="(aq)">(aq)</button><button type="button" data-st="(s)">(s)</button><button type="button" data-st="(l)">(l)</button><button type="button" data-st="(g)">(g)</button></div></div>
-      <div class="eqColors" id="eqColors"></div>
+      <div class="eqPal" id="eqPal" title="Teil der Gleichung im Eingabefeld markieren, dann Farbe wählen"></div>
       <div id="eqPrev" class="eqPrev"></div>
+      <div class="eqBalRow"><button type="button" id="eqBal" title="Koeffizienten nach Atom- und Ladungsbilanz bestimmen">⚖ Ausgleichen</button><label class="check" title="Beim Einfügen und Kopieren die Koeffizienten automatisch ergänzen"><input type="checkbox" id="eqAuto" checked> automatisch ausgleichen</label><span id="eqStat" class="eqStat"></span><button type="button" id="eqCopy" title="Als bearbeitbaren Text (mit tief-/hochgestellten Zahlen und Farben) in die Zwischenablage – z. B. für Word">📋 Als Text kopieren</button></div>
       <div class="eqFoot">
-        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>=</b> oder <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔. (aq), (s), (l), (g) erscheinen etwas kleiner und tiefer. Pfeil ändern: Pfeil in der Vorschau anklicken (oder Schreibmarke daneben setzen) und oben einen anderen Pfeil wählen.</div>
+        <div class="eqHelp">Zahlen hinter Symbolen werden tiefgestellt (H2O), mit + oder − dahinter hochgestellt (Fe3+, Cl-). <b>4;2-</b> setzt 2− über die 4 (SO4;2-, HSO4;-). Vorangestellte Zahlen bleiben Koeffizienten. <b>=</b> oder <b>-&gt;</b> wird zu →, <b>&lt;=&gt;</b> zu ⇌, <b>&lt;-&gt;</b> zu ↔. (aq), (s), (l), (g) erscheinen etwas kleiner und tiefer. Pfeil ändern: Pfeil in der Vorschau anklicken (oder Schreibmarke daneben setzen) und oben einen anderen Pfeil wählen. Farbe: Teil im Eingabefeld markieren und Farbe wählen.</div>
         <div class="eqBtns"><button id="eqCancel">Abbrechen</button><button id="eqOk" class="primary">Einfügen</button></div>
       </div>
     </div>
@@ -414,6 +416,7 @@
       </span>
       <button id="selInsCH2" class="hide" title="CH₂-Einheit in die ausgewählte Einfachbindung einschieben (Kette bzw. Ring wird um ein C-Atom verlängert)">+ CH₂ einschieben</button>
       <button id="selEqEdit" class="hide" title="Reaktionsgleichung bearbeiten (oder Doppelklick auf die Gleichung)">✎ Gleichung bearbeiten</button>
+      <button id="selEqCopy" class="hide" title="Gleichung als bearbeitbaren Text in die Zwischenablage (z. B. für Word)">📋 Als Text kopieren</button>
       <button id="selDup" title="Ausgewählte Strukturformel(n) duplizieren – die Kopie erscheint rechts daneben (Strg+D)">⎘ Duplizieren</button>
       <button id="selDisp" class="hide" title="Rest als Strukturformel oder als Halbstrukturformel (z. B. CH₂CH₃) darstellen"></button>
       <button id="selSum" class="hide" title="Rest als Summenformel (z. B. C₂H₅) darstellen"></button>
@@ -3719,91 +3722,230 @@ const EQ_ARROWS = {'→': {type: 'reaction'}, '⇌': {type: 'equilibrium'}, '↔
 const EQ_SIZE = 20;
 // „=“ wird zum Reaktionspfeil; „<=>“ (beim Tippen zunächst „<→“ + „>“) zum Gleichgewichtspfeil
 function eqNormalize(t) { return t.replace(/<=>/g, '⇌').replace(/<→>/g, '⇌').replace(/<->/g, '↔').replace(/-->/g, '→').replace(/->/g, '→').replace(/=/g, '→'); }
-// Zerlegen: Koeffizienten normal, Zahlen hinter Symbolen tief, Zahl+Ladung hoch, „4;2-“ gestapelt
-function eqTokens(src) {
-  const s = eqNormalize(src), out = [];
+// Zerlegen: Koeffizienten normal, Zahlen hinter Symbolen tief, Zahl+Ladung hoch, „4;2-“ gestapelt.
+// Jedes Zeichen behält seine Stelle im Text (idx) – für Farben, die man im Eingabefeld markiert.
+function eqTokens(s) {
+  const out = [];
   let ctx = false;   // steht direkt davor ein Formelzeichen (Buchstabe, Klammer zu, tiefgestellte Zahl)?
   const isEnd = c => c === undefined || /\s/.test(c) || c in EQ_ARROWS || c === ';' || c === '(' || c === ')' || c === ',';
-  const pushN = t => { const l = out[out.length - 1]; if (l && l.k === 'n') l.t += t; else out.push({k: 'n', t}); };
+  const rng = (a, b) => { const r = []; for (let k = a; k < b; k++) r.push(k); return r; };
+  const pushN = (t, i) => { const l = out[out.length - 1]; if (l && l.k === 'n') { l.t += t; l.idx.push(i); } else out.push({k: 'n', t, idx: [i]}); };
   const sg = c => c === '+' ? '+' : '−';
   for (let i = 0; i < s.length;) {
     const c = s[i];
     if (/\s/.test(c)) { if (out.length && out[out.length - 1].k !== 'sp') out.push({k: 'sp'}); ctx = false; i++; continue; }
     if (c in EQ_ARROWS) { out.push({k: 'arrow', a: c, src: i}); ctx = false; i++; continue; }
-    // Aggregatzustand (aq), (s), (l), (g) hinter einer Formel: klein und tiefgestellt
-    { const ms = s.slice(i).match(/^\((aq\.?|s|l|g)\)/i); if (ms) { out.push({k: 'state', t: '(' + ms[1].toLowerCase() + ')'}); ctx = false; i += ms[0].length; continue; } }
+    // Aggregatzustand (aq), (s), (l), (g) hinter einer Formel
+    { const ms = s.slice(i).match(/^\((aq\.?|s|l|g)\)/i); if (ms) { out.push({k: 'state', t: ms[0].toLowerCase(), idx: rng(i, i + ms[0].length)}); ctx = false; i += ms[0].length; continue; } }
     if (/\d/.test(c)) {
       let j = i; while (j < s.length && /\d/.test(s[j])) j++;
       const num = s.slice(i, j), m = s.slice(j).match(/^;(\d*)([+\-−])/);
-      if (ctx && m) { out.push({k: 'stack', sub: num, sup: m[1] + sg(m[2])}); i = j + m[0].length; continue; }
-      if (ctx && '+-−'.includes(s[j] || 'x') && isEnd(s[j + 1])) { out.push({k: 'sup', t: num + sg(s[j])}); i = j + 1; continue; }
-      if (ctx) { out.push({k: 'sub', t: num}); i = j; continue; }
+      if (ctx && m) { out.push({k: 'stack', sub: num, subIdx: rng(i, j), sup: m[1] + sg(m[2]), supIdx: rng(j + 1, j + m[0].length)}); i = j + m[0].length; continue; }
+      if (ctx && '+-−'.includes(s[j] || 'x') && isEnd(s[j + 1])) { out.push({k: 'sup', t: num + sg(s[j]), idx: rng(i, j + 1)}); i = j + 1; continue; }
+      if (ctx) { out.push({k: 'sub', t: num, idx: rng(i, j)}); i = j; continue; }
       // stöchiometrische Zahl (auch 1/2)
       const mc = s.slice(i).match(/^\d+(?:[\/,.]\d+)?/);
-      out.push({k: 'coef', t: mc[0]}); i += mc[0].length; continue;
+      out.push({k: 'coef', t: mc[0], idx: rng(i, i + mc[0].length)}); i += mc[0].length; continue;
     }
     if ('+-−'.includes(c)) {
-      if (ctx && isEnd(s[i + 1])) { out.push({k: 'sup', t: sg(c)}); i++; continue; }
-      if (c === '+') { out.push({k: 'op', t: '+'}); ctx = false; i++; continue; }
-      pushN('−'); ctx = false; i++; continue;
+      if (ctx && isEnd(s[i + 1])) { out.push({k: 'sup', t: sg(c), idx: [i]}); i++; continue; }
+      if (c === '+') { out.push({k: 'op', t: '+', idx: [i], src: i}); ctx = false; i++; continue; }
+      pushN('−', i); ctx = false; i++; continue;
     }
-    pushN(c); ctx = /[A-Za-zÄÖÜäöüß)\]]/.test(c); i++;
+    pushN(c, i); ctx = /[A-Za-zÄÖÜäöüß)\]]/.test(c); i++;
   }
   while (out.length && out[out.length - 1].k === 'sp') out.pop();
   return out;
 }
 let eqCv = null;
 const eqW = (t, px) => { eqCv = eqCv || document.createElement('canvas').getContext('2d'); eqCv.font = px + 'px ' + FF(); return eqCv.measureText(t).width; };
+// Text in gleichfarbige Stücke zerlegen (cmap: Farbe je Zeichen)
+function eqSplit(t, idx, cmap) {
+  const r = [];
+  for (let k = 0; k < t.length; k++) {
+    const c = (cmap && cmap[idx[k]]) || null, l = r[r.length - 1];
+    if (l && l.col === c) l.t += t[k]; else r.push({t: t[k], col: c});
+  }
+  return r;
+}
 // Lage aller Teile (relativ zum Anfang der Grundlinie)
-function eqLayout(text, size = EQ_SIZE) {
+function eqLayout(text, size = EQ_SIZE, cmap = null) {
   const it = [], sm = size * 0.66, aw = size * 2.3, gap = size * 0.7;
-  let x = 0, prevArrowOrOp = true, lastEl = null;
+  let x = 0;
+  const put = (t, idx, s, dy, extra) => { for (const p of eqSplit(t, idx, cmap)) { it.push({k: 'n', t: p.t, x, s, dy, col: p.col, ...extra}); x += eqW(p.t, s); } };
   const T = eqTokens(text);
   for (let i = 0; i < T.length; i++) {
     const t = T[i];
     if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'coef')) && !(T[i + 1] && T[i + 1].k === 'state')) x += size * 0.28; continue; }
-    // Aggregatzustand: zwischen Normalschrift und Index – etwas kleiner und etwas tiefer
-    if (t.k === 'state') { const ss = size * 0.8; x += size * 0.06; it.push({k: 'n', t: t.t, x, s: ss, dy: size * 0.16, st: true}); x += eqW(t.t, ss); lastEl = null; prevArrowOrOp = false; continue; }
+    if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw, src: t.src, col: (cmap && cmap[t.src]) || null}); x += aw + gap; continue; }
+    if (t.k === 'op') { x += size * 0.5; put('+', t.idx, size, 0); x += size * 0.5; continue; }
     if (t.k === 'coef') {
       // kleiner Abstand zwischen stöchiometrischer Zahl und Formel (deutlich kleiner als vor „+“ bzw. Pfeil)
-      it.push({k: 'n', t: t.t, x, s: size, dy: 0}); x += eqW(t.t, size); lastEl = null;
+      put(t.t, t.idx, size, 0);
       let j = i + 1; while (T[j] && T[j].k === 'sp') j++;
       if (T[j] && T[j].k !== 'op' && T[j].k !== 'arrow') x += size * 0.16;
       continue;
     }
-    if (t.k === 'arrow') { x += gap; it.push({k: 'arrow', a: t.a, x, w: aw, src: t.src}); x += aw + gap; prevArrowOrOp = true; continue; }
-    if (t.k === 'op') { x += size * 0.5; it.push({k: 'n', t: '+', x, s: size, dy: 0}); x += eqW('+', size) + size * 0.5; prevArrowOrOp = true; continue; }
-    if (t.k === 'n') {
-      // Formeltext in Elementsymbole zerlegen (für Farben je Atomsorte)
-      for (const part of t.t.match(/[A-Z][a-z]?|[^A-Z]+/g) || []) {
-        const el = /^[A-Z][a-z]?$/.test(part) ? part : null;
-        it.push({k: 'n', t: part, x, s: size, dy: 0, el}); x += eqW(part, size);
-        lastEl = el || (/[)\]]$/.test(part) ? null : lastEl);
-        if (!el) lastEl = null;
-      }
+    // Aggregatzustand: zwischen Normalschrift und Index – etwas kleiner und etwas tiefer
+    if (t.k === 'state') { x += size * 0.06; put(t.t, t.idx, size * 0.8, size * 0.16); continue; }
+    if (t.k === 'n') put(t.t, t.idx, size, 0);
+    else if (t.k === 'sub') put(t.t, t.idx, sm, size * 0.3);
+    else if (t.k === 'sup') put(t.t, t.idx, sm, -size * 0.45);
+    else if (t.k === 'stack') {
+      const x0 = x; put(t.sub, t.subIdx, sm, size * 0.3); const x1 = x; x = x0; put(t.sup, t.supIdx, sm, -size * 0.45); x = Math.max(x, x1);
     }
-    else if (t.k === 'sub') { it.push({k: 'n', t: t.t, x, s: sm, dy: size * 0.3, el: lastEl}); x += eqW(t.t, sm); }
-    else if (t.k === 'sup') { it.push({k: 'n', t: t.t, x, s: sm, dy: -size * 0.45, ch: true}); x += eqW(t.t, sm); }
-    else if (t.k === 'stack') { it.push({k: 'n', t: t.sub, x, s: sm, dy: size * 0.3, el: lastEl}, {k: 'n', t: t.sup, x, s: sm, dy: -size * 0.45, ch: true}); x += Math.max(eqW(t.sub, sm), eqW(t.sup, sm)); }
-    prevArrowOrOp = false;
   }
   return {it, w: Math.max(x, size)};
 }
 function eqBox(a) { const s = a.size || EQ_SIZE; return {x0: a.x1 - 2, y0: a.y1 - s * 1.05, x1: a.x2 + 2, y1: a.y1 + s * 0.55}; }
-function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328', colors = null) {
-  const L = eqLayout(text, size), f = v => v.toFixed(1), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function eqMarkup(text, x0, y0, size = EQ_SIZE, col = '#1f2328', cmap = null) {
+  const L = eqLayout(text, size, cmap), f = v => v.toFixed(1), esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   let o = ''; const arrs = [];
   for (const q of L.it) {
-    if (q.k === 'arrow') arrs.push({x: x0 + q.x, w: q.w, src: q.src});
-    if (q.k === 'n') { const c = (colors && ((q.el && colors[q.el]) || (q.ch && colors['±']))) || col; o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${c}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
+    const c = q.col || col;
+    if (q.k === 'n') { o += `<text x="${f(x0 + q.x)}" y="${f(y0 + q.dy)}" font-size="${f(q.s)}" font-family="${FF()}" fill="${c}" xml:space="preserve">${esc(q.t)}</text>`; continue; }
+    arrs.push({x: x0 + q.x, w: q.w, src: q.src});
     const A = EQ_ARROWS[q.a], ay = y0 - size * 0.32, xa = x0 + q.x, xb = x0 + q.x + q.w;
-    const t = {type: A.type, x1: xa, y1: ay, x2: xb, y2: ay, width: Math.max(1.4, size / 12), dashed: !!A.dashed, color: col};
+    const t = {type: A.type, x1: xa, y1: ay, x2: xb, y2: ay, width: Math.max(1.4, size / 12), dashed: !!A.dashed, color: c};
     if (A.type === 'curved') { t.y1 = t.y2 = y0 + size * 0.05; t.c1x = xa + q.w * 0.25; t.c1y = y0 - size * 0.9; t.c2x = xa + q.w * 0.75; t.c2y = y0 - size * 0.9; }
     o += arrowSVG(t);
   }
   return {svg: o, w: L.w, arrows: arrs};
 }
-function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328', a.colors); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
+function eqSVG(a) { const r = eqMarkup(a.text || '', a.x1, a.y1, a.size || EQ_SIZE, a.color || '#1f2328', a.cmap); a.x2 = a.x1 + r.w; a.y2 = a.y1; return r.svg; }
+// Gleichung als formatierter Text (HTML mit <sub>/<sup> und Farben) bzw. als reiner Text mit Unicode-Indizes – z. B. zum Einfügen in Word
+function eqToHTML(text, cmap = null, base = null) {
+  const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const span = (t, idx) => eqSplit(t, idx, cmap).map(p => (p.col || base) ? `<span style="color:${p.col || base}">${esc(p.t)}</span>` : esc(p.t)).join('');
+  const T = eqTokens(text); let h = '';
+  for (let i = 0; i < T.length; i++) {
+    const t = T[i];
+    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'coef' || q.k === 'state'))) h += ' '; continue; }
+    if (t.k === 'arrow') { const c = (cmap && cmap[t.src]) || base; h += ' ' + (c ? `<span style="color:${c}">${t.a}</span>` : t.a) + ' '; continue; }
+    if (t.k === 'op') { h += ' ' + span('+', t.idx) + ' '; continue; }
+    if (t.k === 'coef') { h += span(t.t, t.idx); let j = i + 1; while (T[j] && T[j].k === 'sp') j++; if (T[j] && T[j].k !== 'op' && T[j].k !== 'arrow') h += '&#8239;'; continue; }
+    if (t.k === 'n') h += span(t.t, t.idx);
+    else if (t.k === 'sub') h += `<sub>${span(t.t, t.idx)}</sub>`;
+    else if (t.k === 'sup') h += `<sup>${span(t.t, t.idx)}</sup>`;
+    else if (t.k === 'stack') h += `<sub>${span(t.sub, t.subIdx)}</sub><sup>${span(t.sup, t.supIdx)}</sup>`;
+    else if (t.k === 'state') h += `<sub>${span(t.t, t.idx)}</sub>`;
+  }
+  return h.replace(/ {2,}/g, ' ').trim();
+}
+function eqToPlain(text) {
+  const SUB = {0: '₀', 1: '₁', 2: '₂', 3: '₃', 4: '₄', 5: '₅', 6: '₆', 7: '₇', 8: '₈', 9: '₉', '(': '₍', ')': '₎', '+': '₊', '−': '₋'};
+  const SUP = {0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹', '+': '⁺', '−': '⁻'};
+  const map = (t, M) => [...t].map(c => M[c] || c).join('');
+  const T = eqTokens(text); let h = '';
+  for (let i = 0; i < T.length; i++) {
+    const t = T[i];
+    if (t.k === 'sp') { const nb = [T[i - 1], T[i + 1]]; if (!nb.some(q => q && (q.k === 'op' || q.k === 'arrow' || q.k === 'state'))) h += ' '; continue; }
+    if (t.k === 'arrow') h += ' ' + t.a + ' ';
+    else if (t.k === 'op') h += ' + ';
+    else if (t.k === 'coef') { h += t.t; let j = i + 1; while (T[j] && T[j].k === 'sp') j++; if (T[j] && T[j].k !== 'op' && T[j].k !== 'arrow' && (T[i + 1] || {}).k !== 'sp') h += ' '; }
+    else if (t.k === 'n' || t.k === 'state') h += t.t;
+    else if (t.k === 'sub') h += map(t.t, SUB);
+    else if (t.k === 'sup') h += map(t.t, SUP);
+    else if (t.k === 'stack') h += map(t.sub, SUB) + map(t.sup, SUP);
+  }
+  return h.replace(/ {2,}/g, ' ').trim();
+}
+/* ---------- Koeffizienten bestimmen (Atom- und Ladungsbilanz, kleinste ganze Zahlen) ---------- */
+// Teilchen der Gleichung: Bereiche im Text, Formel ohne Koeffizient, Zusammensetzung, Ladung
+function eqSpecies(text) {
+  const T = eqTokens(text), sides = [[]];
+  let cur = null, arrows = 0;
+  const close = () => { if (cur) { sides[sides.length - 1].push(cur); cur = null; } };
+  const touch = (a, b) => { if (!cur) cur = {a, b}; else { cur.a = Math.min(cur.a, a); cur.b = Math.max(cur.b, b); } };
+  for (const t of T) {
+    if (t.k === 'sp') continue;
+    if (t.k === 'arrow') { close(); arrows++; sides.push([]); continue; }
+    if (t.k === 'op') { close(); continue; }
+    const ids = t.idx || [...(t.subIdx || []), ...(t.supIdx || [])];
+    if (ids.length) touch(Math.min(...ids), Math.max(...ids) + 1);
+  }
+  close();
+  return {sides, arrows};
+}
+function eqParseFormula(f) {
+  let s = f.replace(/\((aq\.?|s|l|g)\)\s*$/i, '').trim(), charge = 0;
+  const mc = s.match(/;?(\d*)([+\-−])$/);
+  if (mc) { charge = (mc[1] ? +mc[1] : 1) * (mc[2] === '+' ? 1 : -1); s = s.slice(0, s.length - mc[0].length); }
+  if (/^e$/.test(s)) return {cnt: {}, charge: charge || -1};
+  const cnt = {};
+  const parts = s.split(/[·*•]/);
+  for (let p of parts) {
+    let mul = 1; const mm = p.match(/^(\d+)/); if (mm) { mul = +mm[1]; p = p.slice(mm[1].length); }
+    let i = 0;
+    const group = () => {
+      const c = {};
+      while (i < p.length) {
+        const ch = p[i];
+        if (ch === '(' || ch === '[') { i++; const g = group(); if (p[i] === ')' || p[i] === ']') i++; let n = ''; while (/\d/.test(p[i] || '')) n += p[i++]; const k = n ? +n : 1; for (const e in g) c[e] = (c[e] || 0) + g[e] * k; continue; }
+        if (ch === ')' || ch === ']') return c;
+        const me = p.slice(i).match(/^([A-Z][a-z]?)(\d*)/);
+        if (me) { c[me[1]] = (c[me[1]] || 0) + (me[2] ? +me[2] : 1); i += me[0].length; continue; }
+        throw new Error('Formel');
+      }
+      return c;
+    };
+    const g = group();
+    for (const e in g) cnt[e] = (cnt[e] || 0) + g[e] * mul;
+  }
+  if (!Object.keys(cnt).length) throw new Error('Formel');
+  return {cnt, charge};
+}
+function eqBalance(text) {
+  const {sides, arrows} = eqSpecies(text);
+  if (arrows !== 1 || sides.length !== 2 || !sides[0].length || !sides[1].length) return {ok: false, why: 'Zum Ausgleichen genau einen Pfeil mit Stoffen auf beiden Seiten eingeben.'};
+  const sp = [];
+  for (let si = 0; si < 2; si++) for (const r of sides[si]) {
+    const raw = text.slice(r.a, r.b), mc = raw.match(/^(\d+(?:[\/,.]\d+)?)\s*/);
+    const f = mc ? raw.slice(mc[0].length) : raw;
+    let p; try { p = eqParseFormula(f); } catch (e) { return {ok: false, why: `„${f}“ ist keine Summenformel.`}; }
+    sp.push({side: si, r, fa: r.a + (mc ? mc[0].length : 0), ...p});
+  }
+  const els = [...new Set(sp.flatMap(q => Object.keys(q.cnt)))];
+  const rows = els.map(e => sp.map(q => (q.cnt[e] || 0) * (q.side ? -1 : 1)));
+  if (sp.some(q => q.charge)) rows.push(sp.map(q => q.charge * (q.side ? -1 : 1)));
+  // Nullraum über Brüche (rationale Gauß-Elimination)
+  const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+  const fr = (n, d = 1) => { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d); return [n / g, d / g]; };
+  const sub = (x, y) => fr(x[0] * y[1] - y[0] * x[1], x[1] * y[1]), mul = (x, y) => fr(x[0] * y[0], x[1] * y[1]), div = (x, y) => fr(x[0] * y[1], x[1] * y[0]);
+  const n = sp.length, M = rows.map(r => r.map(v => fr(v)));
+  const piv = []; let row = 0;
+  for (let c = 0; c < n && row < M.length; c++) {
+    let pr = -1; for (let r = row; r < M.length; r++) if (M[r][c][0] !== 0) { pr = r; break; }
+    if (pr < 0) continue;
+    [M[row], M[pr]] = [M[pr], M[row]];
+    const pv = M[row][c]; M[row] = M[row].map(v => div(v, pv));
+    for (let r = 0; r < M.length; r++) if (r !== row && M[r][c][0] !== 0) { const k = M[r][c]; M[r] = M[r].map((v, j) => sub(v, mul(k, M[row][j]))); }
+    piv.push(c); row++;
+  }
+  const free = [...Array(n).keys()].filter(c => !piv.includes(c));
+  if (free.length === 0) return {ok: false, why: 'Diese Gleichung lässt sich nicht ausgleichen – stimmen die Formeln?'};
+  if (free.length > 1) return {ok: false, why: 'Die Koeffizienten sind nicht eindeutig (mehrere unabhängige Reaktionen).'};
+  const fc = free[0], x = Array(n).fill(null); x[fc] = [1, 1];
+  piv.forEach((c, r) => { x[c] = fr(-M[r][fc][0], M[r][fc][1]); });
+  let L = 1; x.forEach(v => { L = L / gcd(L, v[1]) * v[1]; });
+  let co = x.map(v => v[0] * (L / v[1]));
+  if (co.every(v => v <= 0)) co = co.map(v => -v);
+  if (co.some(v => v <= 0)) return {ok: false, why: 'Diese Gleichung lässt sich nicht ausgleichen – stimmen die Formeln?'};
+  let g = 0; co.forEach(v => { g = gcd(g, v); }); co = co.map(v => v / g);
+  return {ok: true, sp, co};
+}
+// Text mit den berechneten Koeffizienten neu aufbauen; Farben je Zeichen werden mitgeführt
+function eqApplyCoefs(text, cmap, res) {
+  let out = '', cm = [], pos = 0;
+  const copy = (a, b) => { out += text.slice(a, b); for (let k = a; k < b; k++) cm.push(cmap ? cmap[k] || null : null); };
+  res.sp.forEach((q, i) => {
+    copy(pos, q.r.a);
+    const c = res.co[i]; if (c !== 1) { out += c + ' '; for (let k = 0; k <= String(c).length; k++) cm.push(null); }
+    copy(q.fa, q.r.b); pos = q.r.b;
+  });
+  copy(pos, text.length);
+  return {text: out, cmap: cm};
+}
 function makeArrow(type, x1, y1, x2, y2) {
   const a = {id: nextId++, type, x1, y1, x2, y2, dashed: arrowDashed, head: arrowHead, width: arrowWidth};
   if (HS_DEF[type]) a.hs = arrowHS[type] || HS_DEF[type];
@@ -7140,7 +7282,7 @@ function updateSelBar() {
   const showBS = !!selB && selB.order === 1 && !isProj(display.mode) && display.mode !== 'struct';
   selBondSt.classList.toggle('hide', !showBS);
   document.getElementById('selInsCH2').classList.toggle('hide', !canInsCH2(selB));
-  { const ea = selArrows(); document.getElementById('selEqEdit').classList.toggle('hide', !(ea.length === 1 && ea[0].type === 'eq' && sel.size === 1)); }
+  { const ea = selArrows(); const one = ea.length === 1 && ea[0].type === 'eq' && sel.size === 1; document.getElementById('selEqEdit').classList.toggle('hide', !one); document.getElementById('selEqCopy').classList.toggle('hide', !one); }
   if (showBS) selBondSt.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.bs === (selB.stereo || 'none')));
   // Rest umschalten: Strukturformel ⇄ Gruppenformel
   const dInfo = aKeysForDisp();
@@ -7373,10 +7515,38 @@ function duplicateSelection() {
   toast(n ? (n === 1 ? 'Molekül dupliziert' : n + ' Moleküle dupliziert') + ' – die Kopie ist ausgewählt und kann verschoben werden' : 'Pfeil(e) dupliziert');
 }
 document.getElementById('selDup').onclick = () => duplicateSelection();
-// Reaktionsgleichung: Eingabefeld mit Pfeilknöpfen und Vorschau
+// Reaktionsgleichung: Eingabefeld mit Pfeilknöpfen, Farben für markierte Teile, Ausgleichen, Vorschau
 let eqEditing = null;
+async function eqCopy(text, cmap, base) {
+  const html = eqToHTML(text, cmap, base && base !== '#1f2328' ? base : null), plain = eqToPlain(text);
+  const doc = `<span style="font-family:Arial,Helvetica,sans-serif">${html}</span>`;
+  try {
+    if (!window.ClipboardItem || !navigator.clipboard?.write) throw new Error('x');
+    await navigator.clipboard.write([new ClipboardItem({'text/html': new Blob([doc], {type: 'text/html'}), 'text/plain': new Blob([plain], {type: 'text/plain'})})]);
+    toast('Gleichung kopiert – in Word mit Strg+V einfügen');
+  } catch (e) {
+    // Ersatzweg: formatierten Text markieren und kopieren
+    const d = document.createElement('div'); d.contentEditable = 'true'; d.innerHTML = doc;
+    d.style.cssText = 'position:fixed;left:-9999px;top:0;white-space:pre'; document.body.appendChild(d);
+    const r = document.createRange(); r.selectNodeContents(d); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {}
+    s.removeAllRanges(); d.remove();
+    if (ok) toast('Gleichung kopiert – in Word mit Strg+V einfügen'); else copyText(plain, 'Gleichung');
+  }
+}
 {
   const inp = document.getElementById('eqInput'), prev = document.getElementById('eqPrev'), panel = document.getElementById('eqPanel');
+  const stat = document.getElementById('eqStat');
+  let cmap = [], last = '';
+  // Farben je Zeichen bei jeder Textänderung mitführen (gleicher Anfang/Ende bleibt, Neues erbt die Farbe des umgebenden Abschnitts)
+  const syncMap = () => {
+    const v = inp.value; if (v === last) return;
+    let p = 0; while (p < v.length && p < last.length && v[p] === last[p]) p++;
+    let q = 0; while (q < v.length - p && q < last.length - p && v[v.length - 1 - q] === last[last.length - 1 - q]) q++;
+    const ins = v.length - p - q, inh = p > 0 && cmap[p - 1] && cmap[p - 1] === cmap[last.length - q] ? cmap[p - 1] : null;
+    cmap = [...cmap.slice(0, p), ...Array(ins).fill(inh), ...cmap.slice(last.length - q)];
+    last = v;
+  };
   const icons = {'→': '#arrowBtns [data-arrow=reaction] svg', '⇌': '#arrowBtns [data-arrow=equilibrium] svg', '↔': '#arrowBtns [data-arrow=resonance] svg', '↷': '#arrowBtns [data-arrow=curved] svg'};
   const names = {'→': 'Reaktionspfeil', '⇌': 'Gleichgewichtspfeil', '↔': 'Mesomeriepfeil', '↷': 'Elektronenverschiebepfeil (gebogen)', '⇢': 'Reaktionspfeil gestrichelt'};
   const box = document.getElementById('eqArrows');
@@ -7392,90 +7562,113 @@ let eqEditing = null;
       let at = -1;
       if (z - a === 1 && isA(v[a])) at = a;
       else if (a === z) { for (const k of [a - 1, a, a - 2, a + 1]) if (isA(v[k])) { at = k; break; } }
-      if (at >= 0) { inp.setRangeText(ch, at, at + 1, 'end'); inp.setSelectionRange(at, at + 1); }
-      else { inp.setRangeText(' ' + ch + ' ', a, z, 'end'); inp.value = inp.value.replace(/ {2,}/g, ' '); }
+      if (at >= 0) { inp.setRangeText(ch, at, at + 1, 'end'); syncMap(); inp.setSelectionRange(at, at + 1); }
+      else { inp.setRangeText(' ' + ch + ' ', a, z, 'end'); syncMap(); }
       inp.focus(); upd();
     };
     box.appendChild(b);
   }
-  const upd = () => {
-    const pos = inp.selectionStart, v = eqNormalize(inp.value);
-    if (v !== inp.value) { const d = inp.value.length - v.length; inp.value = v; inp.setSelectionRange(Math.max(0, pos - d), Math.max(0, pos - d)); }
-    const r = eqMarkup(inp.value, 6, 40, 26, '#1f2328', eqColors), selA = inp.selectionEnd - inp.selectionStart === 1 ? inp.selectionStart : -1;
-    // Pfeile in der Vorschau anklickbar: markiert den Pfeil im Eingabefeld, ein Pfeilknopf ersetzt ihn dann
-    const hits = r.arrows.map(q => `<rect class="eqHit${q.src === selA ? ' on' : ''}" data-src="${q.src}" x="${q.x - 4}" y="10" width="${q.w + 8}" height="40" rx="6"><title>Pfeil anklicken und oben einen anderen Pfeil wählen</title></rect>`).join('');
-    drawColors();
-    prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="58" viewBox="0 0 ${Math.ceil(r.w + 14)} 58">${r.svg}${hits}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
+  // Farbe für den markierten Teil
+  const pal = document.getElementById('eqPal');
+  pal.innerHTML = '<span class="lbl">Farbe der Markierung:</span>' + SWATCHES.map(c => `<button type="button" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('') + '<label class="cust" title="Eigene Farbe"><input type="color" id="eqColCustom" value="#dc2626"></label><button type="button" class="std" data-c="">Standard</button>';
+  const paint = c => {
+    const a = inp.selectionStart, z = inp.selectionEnd;
+    if (a === z) { stat.textContent = 'Zuerst im Eingabefeld einen Teil der Gleichung mit der Maus markieren, dann die Farbe wählen.'; stat.className = 'eqStat warn'; return; }
+    syncMap(); for (let k = a; k < z; k++) cmap[k] = c && c !== '#1f2328' ? c : null;
+    inp.focus(); inp.setSelectionRange(a, z); upd();
   };
-  inp.addEventListener('input', upd);
-  inp.addEventListener('select', upd); inp.addEventListener('keyup', upd); inp.addEventListener('click', upd);
-  prev.addEventListener('click', e => { const h = e.target.closest('.eqHit'); if (!h) return; const k = +h.dataset.src; inp.focus(); inp.setSelectionRange(k, k + 1); upd(); });
-  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eqOk').click(); } if (e.key === 'Escape') eqClose(); });
-  // Farben je Atomsorte bzw. für Ladungen (±)
-  let eqColors = {}, eqPick = null;
-  const colBox = document.getElementById('eqColors');
-  const drawColors = () => {
-    const els = [...new Set(eqLayout(inp.value).it.filter(q => q.el).map(q => q.el))];
-    const hasCh = eqLayout(inp.value).it.some(q => q.ch);
-    const keys = [...els, ...(hasCh ? ['±'] : [])];
-    if (eqPick && !keys.includes(eqPick)) eqPick = null;
-    if (!keys.length) { colBox.innerHTML = ''; return; }
-    let h = '<span class="lbl">Farbe:</span>' + keys.map(k => `<button type="button" class="eqChip${eqPick === k ? ' on' : ''}" data-k="${k}" title="${k === '±' ? 'Ladungen' : 'Atomsorte ' + k} einfärben"><i style="background:${eqColors[k] || '#1f2328'}"></i>${k === '±' ? 'Ladungen' : k}</button>`).join('');
-    if (eqPick) h += '<span class="eqPal">' + SWATCHES.map(c => `<button type="button" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('') + '<button type="button" class="std" data-c="">Standard</button></span>';
-    colBox.innerHTML = h;
-  };
-  colBox.addEventListener('mousedown', e => e.preventDefault());
-  colBox.addEventListener('click', e => {
-    const ch = e.target.closest('.eqChip'), cb = e.target.closest('.eqPal button');
-    if (ch) { eqPick = eqPick === ch.dataset.k ? null : ch.dataset.k; drawColors(); return; }
-    if (cb && eqPick) { if (cb.dataset.c && cb.dataset.c !== '#1f2328') eqColors[eqPick] = cb.dataset.c; else delete eqColors[eqPick]; drawColors(); upd(); }
-  });
+  pal.addEventListener('mousedown', e => { if (!e.target.closest('input')) e.preventDefault(); });
+  pal.addEventListener('click', e => { const b = e.target.closest('button'); if (b) paint(b.dataset.c); });
+  let keepSel = null;
+  document.getElementById('eqColCustom').addEventListener('pointerdown', () => { keepSel = [inp.selectionStart, inp.selectionEnd]; });
+  document.getElementById('eqColCustom').addEventListener('input', e => { if (keepSel) { inp.setSelectionRange(keepSel[0], keepSel[1]); paint(e.target.value); } });
   // Aggregatzustand: hinter die Formel an der Schreibmarke setzen (bzw. vorhandenen ersetzen)
   document.getElementById('eqStates').addEventListener('mousedown', e => e.preventDefault());
   document.getElementById('eqStates').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    const v = inp.value; let a = inp.selectionStart ?? v.length;
-    // Ende der Formel suchen (bis Leerzeichen, +, Pfeil)
+    const v = inp.value; const a = inp.selectionStart ?? v.length;
     let z = a; while (z < v.length && !/\s/.test(v[z]) && !(v[z] in EQ_ARROWS)) z++;
     const m = v.slice(0, z).match(/\((aq\.?|s|l|g)\)$/i);
     const from = m ? z - m[0].length : z;
-    inp.setRangeText(b.dataset.st, from, z, 'end');
+    inp.setRangeText(b.dataset.st, from, z, 'end'); syncMap();
     inp.focus(); upd();
   });
+  // Ausgleichen
+  const balance = quiet => {
+    syncMap();
+    const res = eqBalance(inp.value);
+    if (!res.ok) { if (!quiet) { stat.textContent = res.why; stat.className = 'eqStat warn'; } return false; }
+    const r = eqApplyCoefs(inp.value, cmap, res);
+    const changedTxt = r.text !== inp.value;
+    inp.value = r.text; cmap = r.cmap; last = inp.value;
+    upd();
+    if (!quiet) { stat.textContent = changedTxt ? 'Koeffizienten ergänzt ✓' : 'Die Gleichung ist bereits ausgeglichen ✓'; stat.className = 'eqStat ok'; }
+    return true;
+  };
+  document.getElementById('eqBal').onclick = () => balance(false);
+  const statusLine = () => {
+    const res = eqBalance(inp.value);
+    if (!inp.value.trim()) { stat.textContent = ''; stat.className = 'eqStat'; return; }
+    if (!res.ok) { stat.textContent = eqSpecies(inp.value).arrows ? res.why : ''; stat.className = 'eqStat'; return; }
+    const same = eqApplyCoefs(inp.value, null, res).text === inp.value;
+    stat.textContent = same ? 'Ausgeglichen ✓' : 'Noch nicht ausgeglichen – „⚖ Ausgleichen“ ergänzt die Koeffizienten' + (document.getElementById('eqAuto').checked ? ' (geschieht beim Einfügen automatisch)' : '') + '.';
+    stat.className = 'eqStat ' + (same ? 'ok' : '');
+  };
+  const upd = () => {
+    syncMap();
+    const pos = inp.selectionStart, v = eqNormalize(inp.value);
+    if (v !== inp.value) { const d = inp.value.length - v.length; inp.value = v; syncMap(); inp.setSelectionRange(Math.max(0, pos - d), Math.max(0, pos - d)); }
+    const r = eqMarkup(inp.value, 6, 40, 26, '#1f2328', cmap), selA = inp.selectionEnd - inp.selectionStart === 1 ? inp.selectionStart : -1;
+    // Pfeile in der Vorschau anklickbar: markiert den Pfeil im Eingabefeld, ein Pfeilknopf ersetzt ihn dann
+    const hits = r.arrows.map(q => `<rect class="eqHit${q.src === selA ? ' on' : ''}" data-src="${q.src}" x="${q.x - 4}" y="10" width="${q.w + 8}" height="40" rx="6"><title>Pfeil anklicken und oben einen anderen Pfeil wählen</title></rect>`).join('');
+    prev.innerHTML = inp.value.trim() ? `<svg width="${Math.ceil(r.w + 14)}" height="58" viewBox="0 0 ${Math.ceil(r.w + 14)} 58">${r.svg}${hits}</svg>` : '<span style="color:#9aa3ad;font-size:12px;padding-left:4px">Vorschau</span>';
+  };
+  inp.addEventListener('input', () => { upd(); statusLine(); });
+  inp.addEventListener('select', upd); inp.addEventListener('keyup', upd); inp.addEventListener('click', upd);
+  prev.addEventListener('click', e => { const h = e.target.closest('.eqHit'); if (!h) return; const k = +h.dataset.src; inp.focus(); inp.setSelectionRange(k, k + 1); upd(); });
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); document.getElementById('eqOk').click(); } if (e.key === 'Escape') eqClose(); });
   window.eqOpen = a => {
     eqEditing = a || null;
-    eqColors = a && a.colors ? {...a.colors} : {}; eqPick = null;
     panel.classList.remove('hide'); document.getElementById('eqOpen').classList.add('on');
-    inp.value = a ? a.text : (inp.value || '');
+    if (a) { inp.value = a.text; cmap = a.cmap ? a.cmap.slice() : []; }
+    while (cmap.length < inp.value.length) cmap.push(null);
+    last = inp.value;
     document.getElementById('eqOk').textContent = a ? 'Übernehmen' : 'Einfügen';
-    upd(); inp.focus(); inp.select();
+    upd(); statusLine(); inp.focus(); if (!a) inp.select();
   };
   window.eqClose = () => { panel.classList.add('hide'); document.getElementById('eqOpen').classList.remove('on'); eqEditing = null; };
   document.getElementById('eqOpen').onclick = () => panel.classList.contains('hide') ? eqOpen(null) : eqClose();
   document.getElementById('eqCancel').onclick = () => eqClose();
   document.getElementById('eqX').onclick = () => eqClose();
   panel.addEventListener('pointerdown', e => e.stopPropagation());
+  document.getElementById('eqCopy').onclick = () => { syncMap(); if (!inp.value.trim()) return; if (document.getElementById('eqAuto').checked) balance(true); const lead = inp.value.length - inp.value.trimStart().length; eqCopy(inp.value.trim(), cmap.slice(lead), eqEditing?.color); };
+  document.getElementById('eqAuto').onchange = e => { try { localStorage.setItem('molzeichner-eqauto', e.target.checked ? '1' : '0'); } catch (x) {} statusLine(); };
+  try { document.getElementById('eqAuto').checked = localStorage.getItem('molzeichner-eqauto') !== '0'; } catch (x) {}
   document.getElementById('eqOk').onclick = () => {
-    const t = eqNormalize(inp.value).trim();
-    if (!t) { eqClose(); return; }
+    syncMap();
+    if (!inp.value.trim()) { eqClose(); return; }
+    if (document.getElementById('eqAuto').checked) balance(true);
+    // führende/abschließende Leerzeichen entfernen (Farben mitnehmen)
+    const lead = inp.value.length - inp.value.trimStart().length, t = inp.value.trim(), cm = cmap.slice(lead, lead + t.length);
     pushUndo();
     let a = eqEditing && arrows.includes(eqEditing) ? eqEditing : null;
-    const cols = Object.keys(eqColors).length ? {...eqColors} : undefined;
-    if (a) { a.text = t; if (cols) a.colors = cols; else delete a.colors; }
+    const cols = cm.some(Boolean) ? cm : undefined;
+    if (a) { a.text = t; if (cols) a.cmap = cols; else delete a.cmap; delete a.colors; }
     else {
       const bb = bbox(0), r = svg.getBoundingClientRect();
       const eqs = arrows.filter(q => q.type === 'eq');
       const x = eqs.length ? Math.min(...eqs.map(q => q.x1)) : bb ? bb.x : view.x + r.width / view.s * 0.15, y = bb ? bb.y + bb.h + 60 : view.y + r.height / view.s * 0.4;
-      a = {id: nextId++, type: 'eq', text: t, x1: x, y1: y, x2: x, y2: y, size: EQ_SIZE}; if (cols) a.colors = cols;
+      a = {id: nextId++, type: 'eq', text: t, x1: x, y1: y, x2: x, y2: y, size: EQ_SIZE}; if (cols) a.cmap = cols;
       eqSVG(a); arrows.push(a);
     }
     sel.clear(); parkSel.clear(); sel.add('ar:' + a.id);
-    inp.value = ''; eqClose();
+    inp.value = ''; cmap = []; last = ''; eqClose();
     changed(); updateSelBar();
     const bb2 = bbox(40), rr = svg.getBoundingClientRect(), w = rr.width / view.s, h = rr.height / view.s;
     if (bb2 && (bb2.x < view.x || bb2.y < view.y || bb2.x + bb2.w > view.x + w || bb2.y + bb2.h > view.y + h)) fitView();
   };
   document.getElementById('selEqEdit').onclick = () => { const a = selArrows()[0]; if (a && a.type === 'eq') eqOpen(a); };
+  document.getElementById('selEqCopy').onclick = () => { const a = selArrows()[0]; if (a && a.type === 'eq') eqCopy(a.text, a.cmap, a.color); };
 }
 // CH₂-Einheit in eine Einfachbindung zwischen zwei Gerüstatomen (C–C, C–N, C–O …) einschieben
 function canInsCH2(b) {
