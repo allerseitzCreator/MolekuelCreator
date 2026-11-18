@@ -108,7 +108,8 @@
   #selDisp{color:#0b4f49;border-color:#bfe3de}
   #selBondSt.hide{display:none!important}
   #selBondSt button{padding:4px 8px;font-size:13px}
-  #selDisp.hide,#selSum.hide{display:none}
+  #selDisp.hide,#selSum.hide,#selSeg.hide{display:none}
+  #selSeg{display:inline-flex;gap:4px}#selSeg button{color:#93c5fd;border-color:#3b5b8f}#selSeg button.on{outline:2px solid #93c5fd}#selSeg button.hide{display:none}
   #selSum{color:#0b4f49;border-color:#bfe3de}
   .arrowopts{display:flex;gap:5px;margin-top:5px;align-items:stretch}
   .hsrows{display:flex;flex-direction:column;gap:4px;margin-top:6px}
@@ -432,6 +433,7 @@
       <button id="selEqCopy" class="hide" title="Gleichung als bearbeitbaren Text in die Zwischenablage (z. B. für Word)">📋 Als Text kopieren</button>
       <button id="selDup" title="Ausgewählte Strukturformel(n) duplizieren – die Kopie erscheint rechts daneben (Strg+D)">⎘ Duplizieren</button>
       <button id="selDisp" class="hide" title="Rest als Strukturformel oder als Halbstrukturformel (z. B. CH₂CH₃) darstellen"></button>
+      <span id="selSeg" class="hide" title="C-Kette in der Mitte des Moleküls als Halbstrukturformel"><button data-st="sum"></button><button data-st="cond"></button><button data-st="rep"></button><button data-st="off" title="Kette wieder einzeln zeichnen">⌬ einzeln</button></span>
       <button id="selSum" class="hide" title="Rest als Summenformel (z. B. C₂H₅) darstellen"></button>
       <button id="selOwn" class="hide" title="Nur die Gruppe am angeklickten Atom als Formel (z. B. CH₃)"></button>
       <button id="selStereo" class="hide" title="Konfiguration des asymmetrischen C-Atoms festlegen bzw. tauschen"></button>
@@ -500,6 +502,7 @@
       <div class="keys">
         <b style="color:var(--ink);font-weight:500">Zeichnen:</b> mit „Zeichnen“ über die Fläche ziehen – sobald der Zeiger über eine Bindungslänge hinausgeht, entsteht ein weiteres C-Atom (mit seinen H-Atomen), solange man zieht, wächst die Kette weiter (Valenzstrichformel: gerade, Skelettformel: Zickzack). Standard auf leerer Fläche ist die Valenzstrichformel.<br>
         <b style="color:var(--ink);font-weight:500">Kette geht weiter (…):</b> Werkzeug „… Ausschnitt“, dann ein H-Atom (bzw. in der Skelettformel das Atom) anklicken – das H wird durch drei tiefgestellte Punkte ersetzt, das C hat nur noch drei Bindungen. Punkte erneut anklicken (oder Radierer) stellt das H wieder her. Auch über die Auswahl: H-Atom(e) oder mehrere Atome hintereinander auswählen und in der Atomsorten-Liste „… (Kette geht weiter)“ wählen – ausgewählte Atome werden entfernt, am verbleibenden Atom stehen dann die Punkte.<br>
+        <b style="color:var(--ink);font-weight:500">C-Kette zusammenfassen:</b> mehrere C-Atome einer Kette mitten im Molekül auswählen (Umschalt+Klick oder Rahmen) – in der Auswahlleiste erscheint die Kette als C₄H₈, CH₂–CH₂–CH₂–CH₂ oder (CH₂)₄. Formel anklicken: andere Schreibweise wählen oder „⌬ einzeln“.<br>
         <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
         <b style="color:var(--ink);font-weight:500">Stereozentren:</b> unter „Darstellung“ wählen: keine Kennzeichnung, R/S (bzw. * solange die Konfiguration offen ist) oder ✱ Stern an jedem asymmetrischen C-Atom. Beispiele und Namen erscheinen zunächst als Valenzstrichformel ohne Kennzeichnung. Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
@@ -755,6 +758,7 @@ function nearestVisibleAtom(x, y, r) {
   return best;
 }
 function hitTest(w) {
+  for (const q of segHits) if (w.x >= q.x0 && w.x <= q.x1 && w.y >= q.y0 && w.y <= q.y1) return {type: 'atom', id: q.root};
   const selH = (tool === 'select' || tool === 'erase') && !ring, drawH = (tool === 'draw' || tool === 'move') && !ring;
   const a = nearestVisibleAtom(w.x, w.y, 13 / view.s);
   if (tool === 'move' && !ring) for (const p of chPos) if (Math.hypot(p.x - w.x, p.y - w.y) < 7 / view.s) return {type: 'ch', id: p.atom};
@@ -1192,6 +1196,34 @@ function restInfo(id, fromHint) {
   const sum = sumFormula(ids);
   return {from, ids, cond, sum, text: a.dispStyle === 'sum' && sum ? sum : cond};
 }
+/* ---------- C-Kette mitten im Molekül zusammenfassen: C₄H₈ · CH₂–CH₂–CH₂–CH₂ · (CH₂)₄ ---------- */
+// ids: ausgewählte Atome → geordnete Kette mit den beiden Anschlussatomen, sonst null
+function segPath(idList) {
+  const S = new Set(idList); if (!S.size) return null;
+  for (const id of S) { const a = atomById(id); if (!a || a.el !== 'C' || a.charge || a.rad || a.open || [...(collapse.roots?.values() || [])].some(ri => ri.ids.includes(id))) return null; }
+  const ext = [];
+  for (const id of S) for (const b of bondsOf(id)) {
+    const o = otherEnd(b, id), oa = atomById(o);
+    if (S.has(o)) { if (b.order !== 1) return null; continue; }
+    if (oa.el === 'H') return null;
+    if (b.order !== 1 || inRingBond(b)) return null;
+    ext.push({id, o});
+  }
+  if (ext.length !== 2) return null;
+  // Pfad von einem Ende zum anderen
+  const start = ext[0].id, order = [start], seen = new Set([start]);
+  let cur = start;
+  while (true) { const nx = neighbors(cur).find(n => S.has(n.id) && !seen.has(n.id)); if (!nx) break; order.push(nx.id); seen.add(nx.id); cur = nx.id; }
+  if (order.length !== S.size || cur !== ext[1].id && !(S.size === 1)) return null;
+  if (S.size === 1 && ext[0].id !== ext[1].id) return null;
+  return {ids: order, L: ext[0].o, R: ext[1].o};
+}
+function segTexts(ids) {
+  const units = ids.map(id => { const h = implicitH(atomById(id)); return 'C' + (h ? 'H' + (h > 1 ? h : '') : ''); });
+  const same = units.every(u => u === units[0]);
+  return {sum: sumFormula(ids), cond: units.join('–'), rep: same ? (ids.length > 1 ? `(${units[0]})${ids.length}` : units[0]) : null};
+}
+let segHits = [];
 let collapse = {hidden: new Set(), roots: new Map()};
 function computeCollapse() {
   const c = {hidden: new Set(), roots: new Map()};
@@ -1251,6 +1283,16 @@ function molMarkup() {
   const struct = display.mode === 'struct', condM = display.mode === 'cond';
   collapse = computeCollapse();
   const HID = collapse.hidden, ROOTS = collapse.roots;
+  // zusammengefasste C-Ketten in der Mitte des Moleküls
+  const SEGS = [];
+  segHits = [];
+  for (const a of atoms) {
+    if (!a.seg) continue;
+    const sp = segPath(a.seg.ids); if (!sp || sp.ids[0] !== a.id && sp.ids[sp.ids.length - 1] !== a.id) { delete a.seg; continue; }
+    const T = segTexts(sp.ids), text = T[a.seg.style] || T.cond;
+    sp.ids.forEach(id => HID.add(id));
+    SEGS.push({root: a, ...sp, text});
+  }
   const deg = new Map(atoms.map(a => [a.id, 0]));
   bonds.forEach(b => { deg.set(b.a, deg.get(b.a) + 1); deg.set(b.b, deg.get(b.b) + 1); });
   const info = new Map(atoms.map(a => [a.id, atomInfo(a, deg.get(a.id))]));
@@ -1387,7 +1429,19 @@ function molMarkup() {
     out += `<g stroke="${col}" stroke-width="1.5"><circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${rr.toFixed(2)}"/><line x1="${(cx - w).toFixed(2)}" y1="${cy.toFixed(2)}" x2="${(cx + w).toFixed(2)}" y2="${cy.toFixed(2)}"/>${r.sign > 0 ? `<line x1="${cx.toFixed(2)}" y1="${(cy - w).toFixed(2)}" x2="${cx.toFixed(2)}" y2="${(cy + w).toFixed(2)}"/>` : ''}</g>`;
     chPos.push({atom: r.q, x: cx, y: cy});
   }
-  out += '</g><g font-family="' + FF() + '" font-weight="500">' + hLabels;
+  // C-Ketten als Formel: Bindungen vom Anschlussatom bis an die Formel
+  let segLab = '';
+  for (const g of SEGS) {
+    const A = atomById(g.L), B = atomById(g.R), px = (A.x + B.x) / 2, py = (A.y + B.y) / 2, w = (eqW(g.text.replace(/\d/g, ''), 16) + (g.text.match(/\d/g) || []).length * 7) / 2 + 4;
+    for (const E of [A, B]) {
+      const dx = px - E.x, dy = py - E.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+      const g1 = labels.get(E.id) ? gapAt(E, ux, uy) : 0, g2 = rayExit([[-w - 2, -12, w + 2, 11]], -ux, -uy) + 3;
+      if (d - g1 - g2 > 4) out += line(E.x + ux * g1, E.y + uy * g1, px - ux * g2, py - uy * g2);
+    }
+    segLab += `<text x="${px.toFixed(2)}" y="${(py + 5.6).toFixed(2)}" font-size="16" text-anchor="middle" fill="${g.root.color || '#1f2328'}">${subText(g.text)}</text>`;
+    segHits.push({root: g.root.id, x0: px - w, y0: py - 11, x1: px + w, y1: py + 11});
+  }
+  out += '</g><g font-family="' + FF() + '" font-weight="500">' + hLabels + segLab;
   let lp = '';
   for (const a of atoms) {
     if (HID.has(a.id)) continue;
@@ -3593,6 +3647,7 @@ function renderOverlay(preview) {
   let o = '';
   const k = 1 / view.s;
   const mark = (h, fill, stroke) => {
+    if (h.type === 'atom') { const q = segHits.find(r => r.root === h.id); if (q) return `<rect x="${q.x0 - 3}" y="${q.y0 - 3}" width="${q.x1 - q.x0 + 6}" height="${q.y1 - q.y0 + 6}" rx="5" fill="${fill}" stroke="${stroke}" stroke-width="${1.5 * k}"/>`; }
     if (h.type === 'atom') { const a = atomById(h.id); if (a) return `<circle cx="${a.x}" cy="${a.y}" r="${12 * Math.max(1, k)}" fill="${fill}" stroke="${stroke}" stroke-width="${1.5 * k}"/>`; }
     else if (h.type === 'bond') { const b = bondById(h.id); if (b) { const A = atomById(b.a), B = atomById(b.b); return `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${fill}" stroke-width="14" stroke-linecap="round"/>`; } }
     else {
@@ -5413,6 +5468,24 @@ function updateSelBar() {
   // Rest umschalten: Strukturformel ⇄ Gruppenformel
   const dInfo = aKeysForDisp();
   const sub = t => (t || '').replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+  // C-Kette mitten im Molekül (ausgewählte Kettenatome bzw. schon zusammengefasste Kette)
+  {
+    const box = document.getElementById('selSeg'), aK = [...sel].filter(k => k.startsWith('a:')).map(k => parseKey(k).id);
+    const segRoot = aK.length === 1 && atomById(aK[0])?.seg ? atomById(aK[0]) : null;
+    const sp = isProj(display.mode) || !aK.length ? null : segRoot ? segPath(segRoot.seg.ids) : segPath(aK);
+    box.classList.toggle('hide', !sp);
+    if (sp) {
+      const T = segTexts(sp.ids);
+      box.querySelectorAll('button').forEach(b => {
+        const st = b.dataset.st;
+        if (st === 'off') { b.classList.toggle('hide', !segRoot); return; }
+        b.classList.toggle('hide', !T[st]);
+        if (T[st]) b.innerHTML = T[st].replace(/(\d+)/g, m => [...m].map(d => '₀₁₂₃₄₅₆₇₈₉'[d]).join(''));
+        b.classList.toggle('on', !!segRoot && segRoot.seg.style === st);
+        b.title = {sum: 'Als Summenformel', cond: 'Als Halbstrukturformel mit Bindungsstrichen', rep: 'Als Wiederholungseinheit mit Anzahl'}[st];
+      });
+    }
+  }
   selDisp.classList.toggle('hide', !dInfo);
   const selSum = document.getElementById('selSum');
   const showSum = !!dInfo && (!dInfo.isFormula || dInfo.units) && !!dInfo.sum && dInfo.sum !== dInfo.text && display.mode !== 'fischer';
@@ -5580,6 +5653,7 @@ function cloneFrag(f, dx, dy) {
     if (a.sMarks) { const o = {}; for (const k in a.sMarks) o[map.has(+k) ? map.get(+k) : k] = a.sMarks[k]; a.sMarks = o; }
     for (const k of ['stk', 'cdk']) if (typeof a[k] === 'string') a[k] = mk(a[k]);
     if (a.grp) { if (!gmap.has(a.grp)) gmap.set(a.grp, nextGrp++); a.grp = gmap.get(a.grp); }
+    if (a.seg) a.seg = {...a.seg, ids: a.seg.ids.map(x => map.get(x) ?? x)};
     a.x += dx; a.y += dy;
     for (const [kx, ky] of [['skx', 'sky'], ['stx', 'sty'], ['cdx', 'cdy'], ['pax', 'pay']]) if (a[kx] !== undefined) { a[kx] += dx; a[ky] += dy; }
   }
@@ -5932,6 +6006,21 @@ function setRestDisplay(style) {
 }
 selDisp.onclick = () => { const d = aKeysForDisp(); if (d) setRestDisplay(d.isFormula ? 'structure' : 'cond'); };
 document.getElementById('selSum').onclick = () => setRestDisplay('sum');
+document.getElementById('selSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const aK = [...sel].filter(k => k.startsWith('a:')).map(k => parseKey(k).id);
+  const segRoot = aK.length === 1 && atomById(aK[0])?.seg ? atomById(aK[0]) : null;
+  pushUndo();
+  if (b.dataset.st === 'off') { if (segRoot) delete segRoot.seg; sel.clear(); changed(); updateSelBar(); return; }
+  if (segRoot) segRoot.seg.style = b.dataset.st;
+  else {
+    const sp = segPath(aK); if (!sp) { undoStack.pop(); return; }
+    sp.ids.forEach(id => { const x = atomById(id); if (x.seg) delete x.seg; });
+    atomById(sp.ids[0]).seg = {ids: sp.ids, style: b.dataset.st};
+    sel.clear(); sel.add('a:' + sp.ids[0]);
+  }
+  changed(); updateSelBar();
+});
 document.getElementById('selOwn').onclick = () => {
   const d = aKeysForDisp(); if (!d || !d.own) return;
   pushUndo();
