@@ -301,7 +301,7 @@
       <button type="button" id="askClaude" class="ask hide">Claude fragen</button>
     </form>
   </div>
-  <div id="cr"><b>MolekülCreator</b><span>erstellt von Markus Seitz</span><small id="appVer" style="display:block;font-size:10.5px;opacity:.55;margin-top:2px">Version 18.11.2026 · 09:39</small></div>
+  <div id="cr"><b>MolekülCreator</b><span>erstellt von Markus Seitz</span><small id="appVer" style="display:block;font-size:10.5px;opacity:.55;margin-top:2px">Version 18.11.2026 · 09:43</small></div>
 </header>
 
 <div class="main">
@@ -499,7 +499,7 @@
       <h2>Bedienung</h2>
       <div class="keys">
         <b style="color:var(--ink);font-weight:500">Zeichnen:</b> mit „Zeichnen“ über die Fläche ziehen – sobald der Zeiger über eine Bindungslänge hinausgeht, entsteht ein weiteres C-Atom (mit seinen H-Atomen), solange man zieht, wächst die Kette weiter (Valenzstrichformel: gerade, Skelettformel: Zickzack). Standard auf leerer Fläche ist die Valenzstrichformel.<br>
-        <b style="color:var(--ink);font-weight:500">Kette geht weiter (…):</b> Werkzeug „… Ausschnitt“, dann ein H-Atom (bzw. in der Skelettformel das Atom) anklicken – das H wird durch drei tiefgestellte Punkte ersetzt, das C hat nur noch drei Bindungen. Punkte erneut anklicken (oder Radierer) stellt das H wieder her.<br>
+        <b style="color:var(--ink);font-weight:500">Kette geht weiter (…):</b> Werkzeug „… Ausschnitt“, dann ein H-Atom (bzw. in der Skelettformel das Atom) anklicken – das H wird durch drei tiefgestellte Punkte ersetzt, das C hat nur noch drei Bindungen. Punkte erneut anklicken (oder Radierer) stellt das H wieder her. Auch über die Auswahl: H-Atom(e) oder mehrere Atome hintereinander auswählen und in der Atomsorten-Liste „… (Kette geht weiter)“ wählen – ausgewählte Atome werden entfernt, am verbleibenden Atom stehen dann die Punkte.<br>
         <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
         <b style="color:var(--ink);font-weight:500">Stereozentren:</b> unter „Darstellung“ wählen: keine Kennzeichnung, R/S (bzw. * solange die Konfiguration offen ist) oder ✱ Stern an jedem asymmetrischen C-Atom. Beispiele und Namen erscheinen zunächst als Valenzstrichformel ohne Kennzeichnung. Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
@@ -8028,25 +8028,35 @@ const selEl = document.getElementById('selEl');
 selEl.innerHTML = '<option value="">–</option>' + ELEMENTS.map(e => `<option value="${e}">${e}</option>`).join('') + '<optgroup label="Periodensystem">' + PSE.filter(e => !ELEMENTS.includes(e[0])).map(e => `<option value="${e[0]}">${e[0]} – ${e[1]}</option>`).join('') + '</optgroup>';
 selEl.innerHTML = selEl.innerHTML.replace('<option value="">–</option>', '<option value="">–</option><option value="…" title="H durch drei tiefgestellte Punkte ersetzen – die Kette geht weiter">… (Kette geht weiter)</option>');
 selEl.onchange = () => { if (selEl.value === '…') applyDots(); else if (selEl.value) applyElement(selEl.value); };
-// ausgewählte H-Atome (bzw. Atome) durch „…“ ersetzen
+// ausgewählte H-Atome bzw. Atome (auch mehrere hintereinander) durch „…“ ersetzen
 function applyDots() {
-  const jobs = [];
+  const hJobs = [], S = new Set();
   for (const key of sel) {
     const {t, id, k} = parseKey(key), a = atomById(id); if (!a) continue;
-    if (t === 'h') { const q = hPos.find(p => p.atom === id && p.k === k); jobs.push({a, ang: q ? Math.atan2(q.y - a.y, q.x - a.x) : 0}); }
-    else if (t === 'a') {
-      const ba = neighbors(a.id).map(o => Math.atan2(o.y - a.y, o.x - a.x));
-      const sx = ba.reduce((s2, x) => s2 + Math.cos(x), 0), sy = ba.reduce((s2, x) => s2 + Math.sin(x), 0);
-      jobs.push({a, ang: ba.length ? Math.atan2(-sy, -sx) : 0});
-    }
+    if (t === 'h') { const q = hPos.find(p => p.atom === id && p.k === k); hJobs.push({a, ang: q ? Math.atan2(q.y - a.y, q.x - a.x) : 0}); }
+    else if (t === 'a') S.add(id);
   }
-  if (!jobs.length) return;
+  if (!hJobs.length && !S.size) return;
+  // Atome: entfernen; das Nachbaratom, an dem sie hingen, bekommt an dieser Stelle „…“
+  const cuts = [];
+  if (S.size) {
+    for (const b of bonds) {
+      const inA = S.has(b.a), inB = S.has(b.b);
+      if (inA === inB) continue;
+      const r = atomById(inA ? b.b : b.a), x = atomById(inA ? b.a : b.b);
+      cuts.push({r, ang: Math.atan2(x.y - r.y, x.x - r.x), n: b.order === 1.5 ? 1 : b.order});
+    }
+    if (!cuts.length) { toast('Es muss ein Rest des Moleküls übrig bleiben, an dem die Punkte stehen – nur einen Teil der Kette auswählen.'); updateSelBar(); return; }
+  }
   pushUndo();
-  let n = 0; const quiet = toast; 
-  for (const j of jobs) if (implicitH(j.a) >= 1) { j.a.open = (j.a.open || 0) + 1; j.a.openPref = [...(j.a.openPref || []), j.ang]; if (j.a.hOff) j.a.hOff = {}; n++; }
-  if (!n) { undoStack.pop(); toast('Kein H-Atom mehr vorhanden, das ersetzt werden kann.'); updateSelBar(); return; }
+  let n = 0;
+  for (const j of hJobs) if (!S.has(j.a.id) && implicitH(j.a) >= 1) { j.a.open = (j.a.open || 0) + 1; j.a.openPref = [...(j.a.openPref || []), j.ang]; if (j.a.hOff) j.a.hOff = {}; n++; }
+  for (const c of cuts) { c.r.open = (c.r.open || 0) + c.n; c.r.openPref = [...(c.r.openPref || []), ...Array(c.n).fill(c.ang)]; if (c.r.hOff) c.r.hOff = {}; delete c.r.sMarks; }
+  [...S].forEach(id => deleteAtom(id));
   sel.clear(); changed(); updateSelBar();
-  toast(n === 1 ? 'H durch „…“ ersetzt – die Kette geht weiter (Punkte mit dem Radierer anklicken stellt das H wieder her)' : n + ' H durch „…“ ersetzt');
+  if (S.size) toast(`${S.size === 1 ? '1 Atom' : S.size + ' Atome'} durch „…“ ersetzt – die Kette geht weiter (Punkte mit dem Radierer anklicken stellt ein H her)`);
+  else if (n) toast(n === 1 ? 'H durch „…“ ersetzt – die Kette geht weiter' : n + ' H durch „…“ ersetzt');
+  else { undoStack.pop(); toast('Kein H-Atom mehr vorhanden, das ersetzt werden kann.'); }
 }
 const selColor = document.getElementById('selColor');
 selColor.addEventListener('input', e => applyColor(e.target.value, true));
