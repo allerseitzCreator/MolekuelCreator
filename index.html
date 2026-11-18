@@ -301,7 +301,7 @@
       <button type="button" id="askClaude" class="ask hide">Claude fragen</button>
     </form>
   </div>
-  <div id="cr"><b>MolekülCreator</b><span>erstellt von Markus Seitz</span><small id="appVer" style="display:block;font-size:10.5px;opacity:.55;margin-top:2px">Version 13.11.2026 · 17:42</small></div>
+  <div id="cr"><b>MolekülCreator</b><span>erstellt von Markus Seitz</span><small id="appVer" style="display:block;font-size:10.5px;opacity:.55;margin-top:2px">Version 18.11.2026 · 09:27</small></div>
 </header>
 
 <div class="main">
@@ -341,6 +341,7 @@
         <button class="tbtn" data-tool="minus">⊖ Ladung −</button>
         <button class="tbtn" id="mirH" title="Auswahl – oder alles – waagrecht spiegeln (links ↔ rechts)">⇆ Spiegeln</button>
         <button class="tbtn" id="mirV" title="Auswahl – oder alles – senkrecht spiegeln (oben ↔ unten)">⇅ Spiegeln</button>
+        <button class="tbtn" data-tool="dots" title="Kettenfortsetzung: H-Atom (oder Atom) anklicken – das H wird durch drei tiefgestellte Punkte ersetzt, das C hat dann nur noch drei Bindungen (Ausschnitt einer Kette). Punkte anklicken: wieder entfernen">… Ausschnitt</button>
         <button class="tbtn" data-tool="radical" title="Atom anklicken: ein Radikal-Elektron (Punkt) hinzufügen · Punkt anklicken oder Umschalt-Klick aufs Atom: wieder entfernen">• Radikal</button>
       </div>
     </div>
@@ -498,6 +499,7 @@
       <h2>Bedienung</h2>
       <div class="keys">
         <b style="color:var(--ink);font-weight:500">Zeichnen:</b> mit „Zeichnen“ über die Fläche ziehen – sobald der Zeiger über eine Bindungslänge hinausgeht, entsteht ein weiteres C-Atom (mit seinen H-Atomen), solange man zieht, wächst die Kette weiter (Valenzstrichformel: gerade, Skelettformel: Zickzack). Standard auf leerer Fläche ist die Valenzstrichformel.<br>
+        <b style="color:var(--ink);font-weight:500">Kette geht weiter (…):</b> Werkzeug „… Ausschnitt“, dann ein H-Atom (bzw. in der Skelettformel das Atom) anklicken – das H wird durch drei tiefgestellte Punkte ersetzt, das C hat nur noch drei Bindungen. Punkte erneut anklicken (oder Radierer) stellt das H wieder her.<br>
         <b style="color:var(--ink);font-weight:500">Auswählen:</b> Atom/Bindung anklicken (in der Valenzstrichformel auch jedes H), <kbd>Umschalt</kbd>+Klick für mehrere, Rahmen ziehen für einen Bereich, <kbd>Strg</kbd>+<kbd>A</kbd> alles. Ausgewähltes lässt sich einfärben, löschen und verschieben. <b style="color:var(--ink);font-weight:500">Ganzes Molekül:</b> an einer Bindung ziehen (mit „Auswählen“ oder „Verschieben“) bewegt das ganze Molekül, an einem Atom ziehen nur dieses Atom; Doppelklick auf Atom oder Bindung wählt das ganze Molekül.<br>
         <b style="color:var(--ink);font-weight:500">Fischer-Projektion ohne e⁻-Paare:</b> die Fischer-Projektion wird ohne freie Elektronenpaare gezeichnet; für einzelne Atome: Gruppe auswählen → „Freie e⁻-Paare“.<br>
         <b style="color:var(--ink);font-weight:500">Stereozentren:</b> unter „Darstellung“ wählen: keine Kennzeichnung, R/S (bzw. * solange die Konfiguration offen ist) oder ✱ Stern an jedem asymmetrischen C-Atom. Beispiele und Namen erscheinen zunächst als Valenzstrichformel ohne Kennzeichnung. Atom auswählen → „R ⇄ S“. „Fischer“ bzw. „Haworth“ (Ringzucker, z. B. β-D-Glucopyranose) zeigen die Projektion; Kreuzungspunkt bzw. Ring-C anklicken tauscht die Konfiguration. Offenkettige Zucker werden für „Haworth“ automatisch zum Ring geschlossen (β-Form). „C-Atome zeigen“ schreibt alle C aus. In der Fischer-Projektion lassen sich Atome und Gruppen mit „Verschieben“ oder „Auswählen“ ziehen (Rahmen = mehrere); am Ansatz-C einer Ring-Gruppe ziehen schwenkt sie um das Kettenatom, der Griff ↻ dreht sie; „Anordnung zurücksetzen“ stellt die automatische Lage wieder her.<br>
@@ -2621,7 +2623,7 @@ let tool = 'draw', element = 'C', bondOrder = 1, bondStereo = null, ring = null;
 let display = {mode: 'struct', lp: true, lpStyle: 'bar', rs: true, star: false, showC: false, grid: 'off', arom: false, cnum: false};
 try { display.arom = localStorage.getItem('molzeichner-arom') === '1'; display.cnum = localStorage.getItem('molzeichner-cnum') === '1'; } catch (e) {}
 let hPos = [];            // Positionen der explizit gezeichneten H-Atome (Strukturformel)
-let chPos = [], rdPos = [];
+let chPos = [], rdPos = [], opPos = [];
 let lpPos = [];           // Positionen der gezeichneten freien Elektronenpaare
 let sel = new Set();      // Auswahl: 'a:ID', 'b:ID', 'h:ID:k', 'hb:ID:k'
 try { Object.assign(display, JSON.parse(localStorage.getItem('molzeichner-display') || '{}')); } catch (e) {}
@@ -2723,7 +2725,7 @@ function implicitH(a) {
     v = opts.find(x => x >= bs);
     if (v === undefined) v = opts[opts.length - 1] ?? 0;
   }
-  return Math.max(0, v - bs - (a.rad || 0));
+  return Math.max(0, v - bs - (a.rad || 0) - (a.open || 0));
 }
 
 /* ---------- Undo ---------- */
@@ -2786,24 +2788,25 @@ function hitTest(w) {
   const selH = (tool === 'select' || tool === 'erase') && !ring, drawH = (tool === 'draw' || tool === 'move') && !ring;
   const a = nearestVisibleAtom(w.x, w.y, 13 / view.s);
   if (tool === 'move' && !ring) for (const p of chPos) if (Math.hypot(p.x - w.x, p.y - w.y) < 7 / view.s) return {type: 'ch', id: p.atom};
+  if ((tool === 'dots' || tool === 'erase') && !ring) for (const p of opPos) if (Math.hypot(p.x - w.x, p.y - w.y) < 10 / view.s) return {type: 'op', id: p.atom, k: p.k};
   if (selH || (tool === 'radical' && !ring)) {
     let best = null, bd = 7 / view.s;
     for (const [arr, ty] of (selH ? [[lpPos, 'lp'], [rdPos, 'rd'], [chPos, 'ch']] : [[rdPos, 'rd']])) for (const p of arr) { const d = Math.hypot(p.x - w.x, p.y - w.y); if (d < bd) { bd = d; best = {...p, ty}; } }
     if (best && (!a || bd < Math.hypot(a.x - w.x, a.y - w.y))) return best.ty === 'ch' ? {type: 'ch', id: best.atom} : {type: best.ty, id: best.atom, k: best.k};
   }
   if (a) return {type: 'atom', id: a.id};
-  if (selH || drawH) for (const p of hPos) if (Math.hypot(p.x - w.x, p.y - w.y) < 11 / view.s) return {type: 'h', id: p.atom, k: p.k};
+  if (selH || drawH || tool === 'dots') for (const p of hPos) if (Math.hypot(p.x - w.x, p.y - w.y) < 11 / view.s) return {type: 'h', id: p.atom, k: p.k};
   const b = nearestBond(w.x, w.y, 7 / view.s); if (b && !collapse.hidden.has(b.a) && !collapse.hidden.has(b.b)) return {type: 'bond', id: b.id};
   if (selH || (drawH && bondStereo && display.mode === 'struct')) for (const p of hPos) if (segDist(w.x, w.y, p.x1, p.y1, p.x2, p.y2) < 7 / view.s) return {type: 'hb', id: p.atom, k: p.k};
   return null;
 }
-const keyOf = h => ({atom: 'a:', bond: 'b:', h: 'h:', hb: 'hb:', lp: 'lp:', ch: 'ch:', rd: 'rd:'})[h.type] + h.id + (h.k !== undefined ? ':' + h.k : '');
+const keyOf = h => ({atom: 'a:', bond: 'b:', h: 'h:', hb: 'hb:', lp: 'lp:', ch: 'ch:', rd: 'rd:', op: 'op:'})[h.type] + h.id + (h.k !== undefined ? ':' + h.k : '');
 function parseKey(key) { const [t, id, k] = key.split(':'); return {t, id: +id, k: k === undefined ? undefined : +k}; }
 function cleanSel() {
   for (const key of [...sel]) {
     const {t, id, k} = parseKey(key);
     const ok = t === 'a' ? !!atomById(id) : t === 'b' ? !!bondById(id) : t === 'ar' ? !!arrowById(id)
-      : t === 'ch' ? chPos.some(p => p.atom === id) : t === 'rd' ? rdPos.some(p => p.atom === id && p.k === k)
+      : t === 'ch' ? chPos.some(p => p.atom === id) : t === 'rd' ? rdPos.some(p => p.atom === id && p.k === k) : t === 'op' ? opPos.some(p => p.atom === id && p.k === k)
       : (t === 'lp' && isProj(display.mode)) ? projHits.some(p => p.type === 'lp' && p.id === id && p.k === k)
       : (t === 'lp' ? lpPos : hPos).some(p => p.atom === id && p.k === k);
     if (!ok) sel.delete(key);
@@ -3036,10 +3039,23 @@ function atomInfo(a, deg) {
   const bondAng = neighbors(a.id).map(o => Math.atan2(o.y - a.y, o.x - a.x));
   // Gruppe eines Rests in Halbstrukturformel (CH₂–CH₂–CH₃): H stehen auch in der Strukturformel im Symbol
   const cond = !struct || unitShown(a);
-  const hAng = !cond && h > 0 ? (deg === 0 ? isolatedH(h, left) : (crossH(bondAng, h) || spread(bondAng, h))) : [];
+  let hAng = !cond && h > 0 ? (deg === 0 ? isolatedH(h, left) : (crossH(bondAng, h) || spread(bondAng, h))) : [];
+  // Kettenfortsetzung „…“: freie Bindungsstellen statt H – sie belegen Plätze wie H-Atome (bevorzugt dort, wo das H war)
+  let openAng = null;
+  if (a.open > 0) {
+    const n = a.open, tot = h + n;
+    const slots = deg === 0 ? isolatedH(tot, left) : (crossH(bondAng, tot) || spread(bondAng, tot));
+    const free = slots.slice(); openAng = [];
+    for (let k = 0; k < n; k++) {
+      const pref = a.openPref?.[k] ?? 0;
+      let bi = 0, bd = Infinity; free.forEach((t, i) => { const d = Math.abs(Math.atan2(Math.sin(t - pref), Math.cos(t - pref))); if (d < bd) { bd = d; bi = i; } });
+      openAng.push(free.splice(bi, 1)[0]);
+    }
+    if (!cond) hAng = free.slice(0, h);
+  }
   // Keil-Strich-Formel: sp³-C (nicht im Ring) mit seinen H-Atomen räumlich – zwei Bindungen in der Ebene, Keil nach vorn, Strich nach hinten
-  if (display.mode === 'wedge' && !unitShown(a)) { const t = tetraH(a, deg, h, bondAng); if (t) return {show: true, h, left, bondAng, hAng: t.ang, hW: t.w, hLen: t.ang.map(() => 40), cond: false}; }
-  return {show, h, left, bondAng, hAng, cond};
+  if (display.mode === 'wedge' && !unitShown(a) && !a.open) { const t = tetraH(a, deg, h, bondAng); if (t) return {show: true, h, left, bondAng, hAng: t.ang, hW: t.w, hLen: t.ang.map(() => 40), cond: false}; }
+  return {show, h, left, bondAng, hAng, cond, openAng};
 }
 
 // Strahl vom Ursprung in Richtung (ux, uy): Abstand, nach dem er alle Kästen [x0, y0, x1, y1] verlassen hat
@@ -3320,7 +3336,7 @@ function molMarkup() {
   out += '<g stroke="#1f2328" stroke-width="2" stroke-linecap="round" fill="none">';
   // explizite H-Atome (nur Strukturformel)
   let hLabels = '';
-  hPos = []; lpPos = []; chPos = []; rdPos = [];
+  hPos = []; lpPos = []; chPos = []; rdPos = []; opPos = [];
   for (const a of atoms) info.get(a.id).hAng.forEach((ang, k) => {
     const c = Math.cos(ang), s = Math.sin(ang);
     // verschobene H-Atome: Versatz addieren
@@ -3505,6 +3521,23 @@ function molMarkup() {
       out += `<text x="${cx.toFixed(2)}" y="${(a.y - 5).toFixed(2)}" font-size="12" fill="${a.chColor || col}">${chargeStr(a.charge)}</text>`;
       chPos.push({atom: a.id, x: cx + 4 * Math.max(1, Math.abs(a.charge) > 1 ? 1.5 : 1), y: a.y - 9});
     }
+  }
+  // Kettenfortsetzung: drei tiefgestellte Punkte an den freien Bindungsstellen
+  for (const a of atoms) {
+    if (!a.open || HID.has(a.id)) continue;
+    const li = info.get(a.id); if (!li || !li.openAng) continue;
+    const shown = !!labels.get(a.id);
+    li.openAng.forEach((t, k) => {
+      const ux = Math.cos(t), uy = Math.sin(t);
+      // Abstand: hinter dem Elementsymbol (bzw. dicht am Eckpunkt der Skelettformel)
+      let r = shown ? (Math.abs(ux) > 0.5 ? 15 : 13) : 10;
+      // Halbstruktur: H-Gruppe (CH₂, H₂C) auf dieser Seite mit überspringen
+      if (shown && li.cond && li.h > 0 && Math.abs(ux) > 0.5 && ((ux > 0) !== !!li.left)) r += li.h > 1 ? 19 : 12;
+      const cx = a.x + ux * (r + 6 * Math.abs(ux)), cy = a.y + uy * (r + 2) + (shown ? 4 : 0);   // +4: tiefgestellt
+      const col = a.openColors?.[k] || a.color || '#1f2328';
+      for (const dx of [-5, 0, 5]) lp += `<circle cx="${(cx + dx).toFixed(2)}" cy="${cy.toFixed(2)}" r="1.45" fill="${col}"/>`;
+      opPos.push({atom: a.id, k, x: cx, y: cy});
+    });
   }
   out += '</g>' + lp;
   // asymmetrische C-Atome markieren: R/S bzw. * (Konfiguration noch offen)
@@ -5594,6 +5627,7 @@ function renderOverlay(preview) {
     else if (h.type === 'bond') { const b = bondById(h.id); if (b) { const A = atomById(b.a), B = atomById(b.b); return `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="${fill}" stroke-width="14" stroke-linecap="round"/>`; } }
     else {
       if (h.type === 'ch') { const q = chPos.find(r => r.atom === h.id); return q ? `<circle cx="${q.x}" cy="${q.y}" r="${7 * Math.max(1, k)}" fill="${fill}" stroke="${stroke}" stroke-width="${1.2 * k}"/>` : ''; }
+      if (h.type === 'op') { const q = opPos.find(r => r.atom === h.id && r.k === h.k); return q ? `<rect x="${q.x - 9}" y="${q.y - 5}" width="18" height="10" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${1.2 * k}"/>` : ''; }
       if (h.type === 'rd') { const q = rdPos.find(r => r.atom === h.id && r.k === h.k); return q ? `<circle cx="${q.x}" cy="${q.y}" r="${6 * Math.max(1, k)}" fill="${fill}" stroke="${stroke}" stroke-width="${1.2 * k}"/>` : ''; }
       if (h.type === 'lp') { const q = lpPos.find(r => r.atom === h.id && r.k === h.k); return q ? `<circle cx="${q.x}" cy="${q.y}" r="${7 * Math.max(1, k)}" fill="${fill}" stroke="${stroke}" stroke-width="${1.2 * k}"/>` : ''; }
       const p = hPos.find(q => q.atom === h.id && q.k === h.k); if (!p) return '';
@@ -6141,6 +6175,8 @@ function fragGraph(f) {
 }
 function fragName(f) {
   const {g, idx} = fragGraph(f);
+  // Ausschnitt einer Kette (… statt H): kein Verbindungsname
+  if (f.atoms.some(a => a.open)) return {name: 'Ausschnitt einer Kette (…) – kein Verbindungsname', how: 'part', key: 'part', g, f};
   const centers = new Set(stereoInfo().centers.map(c => c.id));
   const cip = new Map(); f.atoms.forEach((a, i) => { if (centers.has(a.id) && a.cip) { cip.set(i, a.cip); g.atoms[i].cip = a.cip; } });
   // E/Z aus der Skelettformel-Lage (die Strukturformel ist rechtwinklig umgeordnet)
@@ -6166,6 +6202,7 @@ function updateIupac() {
   for (const f of frs) {
     const r = fragName(f);
     const nm = t => esc(t).replace(/([-,)\]}])/g, '$1<wbr>');   // Umbruch nach Bindestrich, Komma, Klammer
+    if (r.how === 'part') { html += `<div class="nmline">–<span class="nmnote">Ausschnitt einer Kette (…) – kein Verbindungsname</span></div>`; continue; }
     if (r.how === 'iupac') html += `<div class="nmline">${nm(r.name)}</div>`;
     else if (r.how === 'claude') html += `<div class="nmline">${nm(r.name)}<span class="nmnote">von Claude ermittelt – bitte prüfen</span></div>`;
     else if (r.how === 'example') { html += `<div class="nmline">${nm(r.name)}<span class="nmnote">Name aus den Beispielen – kein systematischer IUPAC-Name berechnet</span></div>`; askable = true; }
@@ -6174,7 +6211,7 @@ function updateIupac() {
   if (askable && samplePromise) html += `<button class="nmask" id="nmAsk"${iupacAsking ? ' disabled' : ''}>${iupacAsking ? 'Claude überlegt …' : 'IUPAC-Namen von Claude ermitteln'}</button>`;
   el.innerHTML = html;
   const btn = document.getElementById('nmAsk');
-  if (btn) btn.onclick = () => askIupac(frs.map(fragName).filter(r => r.how !== 'iupac' && r.how !== 'claude'));
+  if (btn) btn.onclick = () => askIupac(frs.map(fragName).filter(r => r.how !== 'iupac' && r.how !== 'claude' && r.how !== 'part'));
 }
 async function askIupac(list) {
   const sample = samplePromise ? await samplePromise : null;
@@ -6278,6 +6315,23 @@ function applyCharges(list, leavingText) {
   return msgs.length > 0;
 }
 // implizites H entfernen: als Proton H⁺ (Elektronenpaar bleibt am Atom) bzw. als Hydrid H⁻ (bei B, Si)
+// Kettenfortsetzung „…“: ein H (bzw. eine freie Stelle) des Atoms durch drei tiefgestellte Punkte ersetzen
+function addOpen(a, ang) {
+  if (!a) return false;
+  if (implicitH(a) < 1) { toast('Dieses Atom hat kein H-Atom mehr, das ersetzt werden kann.'); return false; }
+  a.open = (a.open || 0) + 1;
+  a.openPref = [...(a.openPref || []), ang ?? 0];
+  if (a.hOff) a.hOff = {}; if (a.hColors) a.hColors = {};
+  toast('H durch „…“ ersetzt (Kette geht weiter) – Punkte anklicken entfernt sie wieder');
+  return true;
+}
+function removeOpen(a, k) {
+  if (!a || !a.open) return false;
+  a.open--; if (a.openPref) a.openPref.splice(k ?? 0, 1); if (a.openColors) delete a.openColors[k];
+  if (!a.open) { delete a.open; delete a.openPref; delete a.openColors; }
+  toast('Punkte entfernt – das H-Atom ist wieder da');
+  return true;
+}
 function removeImplicitH(a) {
   if (implicitH(a) < 1) return false;
   const delta = H_AS_PROTON.has(a.el) ? -1 : 1;
@@ -6306,6 +6360,7 @@ function eraseHit(h, free) {
       if (!a.rad) { delete a.rad; delete a.radColors; }
       toast('Einzelnes Elektron entfernt'); return true;
     }
+    case 'op': return removeOpen(atomById(h.id), h.k);
     case 'ch': if (!a) return false; a.charge = 0; delete a.autoCharge; delete a.chColor; toast('Ladung entfernt'); return true;
     case 'h': case 'hb':
       if (free) { toast('H-Atome ergeben sich aus der Wertigkeit – ohne Ladung lassen sie sich nicht einzeln entfernen.'); return false; }
@@ -7197,6 +7252,18 @@ svg.addEventListener('pointerup', e => {
   } else if (!d.moved && hit) {
     pushUndo();
     if (tool === 'erase') { if (!eraseHit(hit, e.shiftKey)) { undoStack.pop(); hover = hitTest(w); renderOverlay(); return; } }
+    else if (tool === 'dots') {
+      if (hit.type === 'op') { if (!removeOpen(atomById(hit.id), hit.k)) undoStack.pop(); }
+      else if (hit.type === 'h' || hit.type === 'hb') {
+        const a = atomById(hit.id), q = hPos.find(p => p.atom === hit.id && p.k === hit.k);
+        if (!addOpen(a, q ? Math.atan2(q.y - a.y, q.x - a.x) : 0)) undoStack.pop();
+      } else if (hit.type === 'atom') {
+        const a = atomById(hit.id), li = atomInfo(a, neighbors(a.id).length);
+        // ohne gezeichnete H (Skelettformel): Richtung weg von den Bindungen
+        let ang = 0; if (li.bondAng.length) { const sx = li.bondAng.reduce((s2, t) => s2 + Math.cos(t), 0), sy = li.bondAng.reduce((s2, t) => s2 + Math.sin(t), 0); ang = Math.atan2(-sy, -sx); }
+        if (!addOpen(a, li.hAng?.length ? li.hAng[0] : ang)) undoStack.pop();
+      } else undoStack.pop();
+    }
     else if (tool === 'radical') {
       // Punkt anklicken oder Umschalt-Klick aufs Atom: Radikal-Elektron wieder entfernen
       if (hit.type === 'rd') { if (!eraseHit(hit)) undoStack.pop(); }
