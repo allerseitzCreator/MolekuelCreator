@@ -5996,7 +5996,28 @@ function applyElement(el) {
 }
 const selEl = document.getElementById('selEl');
 selEl.innerHTML = '<option value="">–</option>' + ELEMENTS.map(e => `<option value="${e}">${e}</option>`).join('') + '<optgroup label="Periodensystem">' + PSE.filter(e => !ELEMENTS.includes(e[0])).map(e => `<option value="${e[0]}">${e[0]} – ${e[1]}</option>`).join('') + '</optgroup>';
-selEl.onchange = () => { if (selEl.value) applyElement(selEl.value); };
+selEl.innerHTML = selEl.innerHTML.replace('<option value="">–</option>', '<option value="">–</option><option value="…" title="H durch drei tiefgestellte Punkte ersetzen – die Kette geht weiter">… (Kette geht weiter)</option>');
+selEl.onchange = () => { if (selEl.value === '…') applyDots(); else if (selEl.value) applyElement(selEl.value); };
+// ausgewählte H-Atome (bzw. Atome) durch „…“ ersetzen
+function applyDots() {
+  const jobs = [];
+  for (const key of sel) {
+    const {t, id, k} = parseKey(key), a = atomById(id); if (!a) continue;
+    if (t === 'h') { const q = hPos.find(p => p.atom === id && p.k === k); jobs.push({a, ang: q ? Math.atan2(q.y - a.y, q.x - a.x) : 0}); }
+    else if (t === 'a') {
+      const ba = neighbors(a.id).map(o => Math.atan2(o.y - a.y, o.x - a.x));
+      const sx = ba.reduce((s2, x) => s2 + Math.cos(x), 0), sy = ba.reduce((s2, x) => s2 + Math.sin(x), 0);
+      jobs.push({a, ang: ba.length ? Math.atan2(-sy, -sx) : 0});
+    }
+  }
+  if (!jobs.length) return;
+  pushUndo();
+  let n = 0; const quiet = toast; 
+  for (const j of jobs) if (implicitH(j.a) >= 1) { j.a.open = (j.a.open || 0) + 1; j.a.openPref = [...(j.a.openPref || []), j.ang]; if (j.a.hOff) j.a.hOff = {}; n++; }
+  if (!n) { undoStack.pop(); toast('Kein H-Atom mehr vorhanden, das ersetzt werden kann.'); updateSelBar(); return; }
+  sel.clear(); changed(); updateSelBar();
+  toast(n === 1 ? 'H durch „…“ ersetzt – die Kette geht weiter (Punkte mit dem Radierer anklicken stellt das H wieder her)' : n + ' H durch „…“ ersetzt');
+}
 const selColor = document.getElementById('selColor');
 selColor.addEventListener('input', e => applyColor(e.target.value, true));
 selColor.addEventListener('change', () => { colorSession = false; });
